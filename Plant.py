@@ -89,5 +89,5 @@ class Plant:
         print(row, insert_query)
         self.db.insert_data(insert_query, row)
 
-    def water(self):
+    # def water(self):
         

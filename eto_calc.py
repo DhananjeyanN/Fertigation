@@ -1,30 +1,34 @@
-import penmon.eto as pm
-from datetime import datetime, date
+import math
 
 
-class ETO:
-    pm.CHECK_RADIATION_RANGE = False
+def calculate_ET0(Latitude, Altitude, Date, Tmin, Tmax):
+    Δ = 0.1708
+    Rn = 8.09
+    γ = 0.06316
+    Tmean = 23.1
+    u2 =  2.00
+    es_ea = 1.207
 
-    def __init__(self, elevation, latitude, wind_speed_height, t_min, t_max, sunlight_hours, wind_speed, humidity):
-        self.elevation = elevation
-        self.latitude = latitude
-        self.wind_speed_height = wind_speed_height
-        self.t_min = t_min
-        self.t_max = t_max
-        self.sunlight_hours = sunlight_hours
-        self.wind_speed = wind_speed
-        self.humidity = humidity
-        self.station = pm.Station(latitude=latitude, altitude=elevation)
+    if (isinstance(Latitude, float) and isinstance(Altitude, float) and
+            isinstance(Date, float) and isinstance(Tmin, float) and isinstance(Tmax, float)):
+        if isinstance(Δ, float) and isinstance(Rn, float) and isinstance(γ, float) and isinstance(Tmean, float):
+            if isinstance(u2, float) and isinstance(es_ea, float):
+                u2 = max(u2, 0.5)
+                ET0 = (0.408 * Δ * (Rn - 0) + γ * (900 / (Tmean + 273)) * u2 * es_ea) / (Δ + γ * (1 + 0.34 * u2))
+                return ET0
 
-    def calc(self):
-        day = pm.Station(self.latitude, self.elevation, anemometer_height=10).get_day(
-            day_number=238,
-            temp_min=self.t_min,
-            temp_max=self.t_max,
-            wind_speed=self.wind_speed,
-            humidity_mean=self.humidity,)
-        print(day)
-        return day.eto()
+    return None
 
-E = ETO(elevation=10, latitude=80.4, wind_speed_height=10, t_min=40, t_max=60, sunlight_hours=10, wind_speed=30, humidity=40)
-print(E.calc())
+
+# Example usage
+Latitude = 37.5
+Altitude = 500.0
+Date = 7.0
+Tmin = 10.0
+Tmax = 30.0
+
+ET0 = calculate_ET0(Latitude, Altitude, Date, Tmin, Tmax)
+if ET0 is not None:
+    print("Reference Evapotranspiration (ET0):", ET0)
+else:
+    print("Invalid input values.")

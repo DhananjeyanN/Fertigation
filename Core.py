@@ -1,3 +1,4 @@
+import mysql.connector
 import requests
 from datetime import datetime
 
@@ -5,11 +6,12 @@ from Database import DatabaseConfig
 import uuid
 
 from Plant import Plant
+from test1 import get_django_data
 
 
 class Core:
     def __init__(self):
-        self.api_key = 'dfc94720ef570e3dd395a9ffaf3620bf'
+        self.api_key = None
         self.lat = '37.777081'
         self.lon = '-121.967522'
         self.db = DatabaseConfig()
@@ -28,14 +30,25 @@ class Core:
         query = 'CREATE TABLE IF NOT EXISTS FORECAST_WEATHER(row_id INT NOT NULL AUTO_INCREMENT, longitude DECIMAL(10,6),' \
                 ' latitude DECIMAL(8,6), date DATETIME, temperature_f DECIMAL(6,2), wind_mph DECIMAL(6,2), ' \
                 'pressure_in DECIMAL(6,2), precipitation_in DECIMAL(6,4), humidity INT, ' \
-                'cloud INT, dewpoint_f DECIMAL(6,2), chance_rain INT, chance_snow INT, PRIMARY KEY(row_id))'
+                'cloud INT, dewpoint_f DECIMAL(6,2), chance_rain INT, chance_snow INT, PRIMARY KEY(row_id));'
         self.db.create_table(table_name='Forecast', query=query)
 
         query2 = 'CREATE TABLE IF NOT EXISTS CURRENT(row_id INT NOT NULL AUTO_INCREMENT, longitude DECIMAL(10,6), ' \
                  'latitude DECIMAL(8,6), date DATETIME, temperature_f DECIMAL(6,2), wind_mph DECIMAL(6,2), ' \
                  'pressure_in DECIMAL(6,2), precipitation_in DECIMAL(6,4), humidity INT,' \
-                 'cloud INT, PRIMARY KEY(row_id))'
+                 'cloud INT, PRIMARY KEY(row_id));'
         self.db.create_table(table_name='Current', query=query2)
+
+        query3 = 'CREATE TABLE IF NOT EXISTS PLANT(row_id INT NOT NULL AUTO_INCREMENT, ' \
+                 'PRIMARY KEY(row_id), plant_name VARCHAR(100), ec VARCHAR(100), ph VARCHAR(100), ' \
+                 'npk VARCHAR(100), temperature VARCHAR(100), ideal_moisture VARCHAR(100), fertilizer VARCHAR(100), ' \
+                 'plant_coefficient DECIMAL(10,6));'
+        self.db.create_table(table_name='Plant', query=query3)
+
+        query4 = 'CREATE TABLE IF NOT EXISTS LOCALPLANTDATA(row_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, ' \
+                 'PRIMARY KEY(row_id), plant_name VARCHAR(100), plant_id VARCHAR(1000), m_ec DECIMAL(6,6), m_ph DECIMAL(6,6), ' \
+                 'm_npk DECIMAL(6,6), m_temp DECIMAL(6,6), m_moist DECIMAL(6,6), date DATETIME);'
+        self.db.create_table(table_name='Localplantdata', query=query4)
 
     def save_data(self, weather_data):
         current_cols = {
@@ -62,11 +75,72 @@ class Core:
         print(row)
         self.db.insert_data(insert_query, row)
 
+    def save_data_plant(self, plant_data):
+        vals = []
+        for plant in plant_data:
+            print(plant)
+            for k, v in plant.items():
+                print(k, v)
+                if k == 'photo' or k == 'user':
+                    pass
+                else:
+                    print(k,v, 'hi')
+                    vals.append(v)
+        print(vals)
+        try:
+            insert_query = "INSERT INTO PLANT(row_id, plant_name, ec, ph, npk, temperature, ideal_moisture, fertilizer, plant_coefficient) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+            self.db.insert_data(insert_query, vals)
+        except mysql.connector.IntegrityError:
+            pass
+
+    def save_data_measured_plant(self, plant_name, plant_id, m_data): # plant_id: send plant unique id, m_data: send dict with name and data
+        vals = []
+        m_ec = None
+        m_ph = None
+        m_npk = None
+        m_temp = None
+        m_moist = None
+        date = datetime.now()
+        for name, data in m_data.items():
+            if name == 'm_ec':
+                m_ec = data
+            elif name == 'm_ph':
+                m_ph = data
+            elif name == 'm_npk':
+                m_npk = data
+            elif name == 'm_temp':
+                m_temp = data
+            elif name == 'm_moist':
+                m_moist = data
+            else:
+                print('No Data!!!')
+        vals.append(plant_name)
+        vals.append(plant_id)
+        vals.append(m_ec)
+        vals.append(m_ph)
+        vals.append(m_npk)
+        vals.append(m_temp)
+        vals.append(m_moist)
+        vals.append(date)
+        print(vals)
+        insert_query = f"INSERT INTO PLANT(row_id, plant_name, plant_id ,m_ec, m_ph, m_npk, m_temp, m_moist, date) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        self.db.insert_data(insert_query, vals)
 
 
-hi = Core()
-hi.get_forecast()
 
-bean = Plant(hi.db)
-bean.register_plant()
-bean.save_data()
+
+
+
+# hi = Core()
+# hi.get_forecast()
+
+# bean = Plant(hi.db)
+# bean.register_plant()
+# bean.save_data()
+app = Core()
+# app.save_data_plant(plant_data=get_django_data())
+app.save_data_measured_plant(plant_name='Banana', plant_id=1923, m_data={
+    'm_ec': 10,
+    'm_npk': 3,
+    'm_ph': 5,
+})
