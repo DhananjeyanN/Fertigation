@@ -45,9 +45,9 @@ class Core:
                  'plant_coefficient DECIMAL(10,6));'
         self.db.create_table(table_name='Plant', query=query3)
 
-        query4 = 'CREATE TABLE IF NOT EXISTS LOCALPLANTDATA(row_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, ' \
-                 'PRIMARY KEY(row_id), plant_name VARCHAR(100), plant_id VARCHAR(1000), m_ec DECIMAL(6,6), m_ph DECIMAL(6,6), ' \
-                 'm_npk DECIMAL(6,6), m_temp DECIMAL(6,6), m_moist DECIMAL(6,6), date DATETIME);'
+        query4 = 'CREATE TABLE IF NOT EXISTS LOCALPLANTDATA(row_id INT NOT NULL AUTO_INCREMENT, ' \
+                 'PRIMARY KEY(row_id), plant_name VARCHAR(100), plant_id VARCHAR(1000), m_ec DECIMAL(12,6), m_ph DECIMAL(12,6), ' \
+                 'm_npk DECIMAL(12,6), m_temp DECIMAL(12,6), m_moist DECIMAL(12,6), date DATETIME);'
         self.db.create_table(table_name='Localplantdata', query=query4)
 
     def save_data(self, weather_data):
@@ -123,7 +123,7 @@ class Core:
         vals.append(m_moist)
         vals.append(date)
         print(vals)
-        insert_query = f"INSERT INTO PLANT(row_id, plant_name, plant_id ,m_ec, m_ph, m_npk, m_temp, m_moist, date) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        insert_query = "INSERT INTO LOCALPLANTDATA(plant_name, plant_id ,m_ec, m_ph, m_npk, m_temp, m_moist, date) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)"
         self.db.insert_data(insert_query, vals)
 
 
@@ -139,8 +139,9 @@ class Core:
 # bean.save_data()
 app = Core()
 # app.save_data_plant(plant_data=get_django_data())
-app.save_data_measured_plant(plant_name='Banana', plant_id=1923, m_data={
-    'm_ec': 10,
-    'm_npk': 3,
-    'm_ph': 5,
+app.save_data_measured_plant(plant_name='Banana', plant_id="1923", m_data={
+    'm_ec': 9.0,
+    'm_npk': 3.0,
+    'm_ph': 5.0,
+    'm_temp': 30.0,
 })
