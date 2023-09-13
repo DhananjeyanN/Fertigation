@@ -84,7 +84,7 @@ class Core:
                 if k == 'photo' or k == 'user':
                     pass
                 else:
-                    print(k,v, 'hi')
+                    print(k, v, 'hi')
                     vals.append(v)
         print(vals)
         try:
@@ -93,7 +93,8 @@ class Core:
         except mysql.connector.IntegrityError:
             pass
 
-    def save_data_measured_plant(self, plant_name, plant_id, m_data): # plant_id: send plant unique id, m_data: send dict with name and data
+    def save_data_measured_plant(self, plant_name, plant_id,
+                                 m_data):  # plant_id: send plant unique id, m_data: send dict with name and data
         vals = []
         m_ec = None
         m_ph = None
@@ -127,10 +128,6 @@ class Core:
         self.db.insert_data(insert_query, vals)
 
 
-
-
-
-
 # hi = Core()
 # hi.get_forecast()
 
@@ -145,3 +142,37 @@ app.save_data_measured_plant(plant_name='Banana', plant_id="1923", m_data={
     'm_ph': 5.0,
     'm_temp': 30.0,
 })
+
+
+def update_plant_details(plant_id, updated_data):
+    url = f'http://127.0.0.1:8000/api/update/{plant_id}/'
+    token = input('Enter Token')
+
+    # Get CSRF Token
+
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json',
+    }
+
+    response = requests.put(url, json=updated_data, headers=headers)
+    print(response.status_code)
+    print(response.text)
+
+    return response.json()
+
+
+# Example usage
+plant_id = 1  # Replace with the ID of the plant you want to update
+updated_data = {
+    'name': 'Updated Bean',
+    'ec': '2.5',
+    'ph': '3.5',
+    'npk': '5',
+    'temperature': '25',
+    'ideal_moisture': '3',
+    'fertilizer': 'Organic',
+    'plant_coefficient': 2.5,
+    # ... add other fields as necessary
+}
+print(update_plant_details(plant_id, updated_data))
