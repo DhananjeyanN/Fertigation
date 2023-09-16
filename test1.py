@@ -22,16 +22,64 @@ def update_data_table_entry(entry_id, updated_data):
 
     return response.json()
 
+
+def add_data_table_entry(new_data):
+    url = f'http://127.0.0.1:8000/api/datatable/add/'  # Assuming this is your endpoint
+    token = input('Enter Token')
+
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json',
+    }
+
+    response = requests.post(url, json=new_data, headers=headers)
+    print(response.status_code)
+    print(response.text)
+    if response.status_code == 201:
+        return response.json()
+    else:
+        print(response.text)
+
+
+def del_data_table_entry(entry_id):
+        url = f'http://127.0.0.1:8000/api/datatable/del/{entry_id}/'  # Assuming this is your endpoint
+        token = input('Enter Token')
+
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json',
+        }
+
+        response = requests.delete(url, headers=headers)
+        print(response.status_code)
+        print(response.text)
+
+        return response.json()
+
 # Example usage
-entry_id = 1  # Replace with the ID of the DataTable entry you want to update
-plant_id = 1  # Replace with the ID of the Plant entry you want to update
-updated_data = {
-    'plant': plant_id,  # assuming you want to associate this data with a specific plant
-    'm_temp': 25.0,
-    'm_moist': 3.0,
-    'm_ec': 2.5,
-    'm_npk': 5.0,
-    'm_ph': 3.5,
-    # 'date_time': '2023-09-08T12:00:00Z'  # You don't need this for update as it's auto set on creation
-}
-print(update_data_table_entry(entry_id, updated_data))
+# entry_id = 2  # Replace with the ID of the DataTable entry you want to update
+# plant_id = 1  # Replace with the ID of the Plant entry you want to update
+# updated_data = {
+#     'plant': plant_id,  # assuming you want to associate this data with a specific plant
+#     'm_temp': 29.0,
+#     'm_moist': 23.0,
+#     'm_ec': 4.5,
+#     'm_npk': 2.0,
+#     'm_ph': 1.5,
+#     # 'date_time': '2023-09-08T12:00:00Z'  # You don't need this for update as it's auto set on creation
+# }
+# print(update_data_table_entry(entry_id, updated_data))
+
+# plant_id = 1  # Replace with the ID of the Plant entry you want to update
+# new_data = {
+#     'plant': plant_id,  # assuming you want to associate this data with a specific plant
+#     'm_temp': 1.0,
+#     'm_moist': 90.0,
+#     'm_ec': 9.2,
+#     'm_npk': 3.0,
+#     'm_ph': 2.5,
+#     # 'date_time': '2023-09-08T12:00:00Z'  # You don't need this for update as it's auto set on creation
+# }
+# print(add_data_table_entry(new_data))
+
+del_data_table_entry(entry_id=3)
