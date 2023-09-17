@@ -1,4 +1,5 @@
 import requests
+from Core import Core
 
 def get_data_table_entries():
     url = 'http://127.0.0.1:8000/api/datatable'
@@ -53,8 +54,28 @@ def del_data_table_entry(entry_id):
         response = requests.delete(url, headers=headers)
         print(response.status_code)
         print(response.text)
+        if response.status_code == 204:
+            return {'message': 'deleted succesfully!!!'}
+        else:
+            return response.text
 
-        return response.json()
+
+def get_user_plant_data(plant_id):
+    url = f'http://127.0.0.1:8000/api/get_plant/{plant_id}/'
+    token = input('Enter token: ')
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json',
+    }
+    response = requests.get(url, headers=headers)
+    print(response.json())
+    response_json = response.json()
+    plant_name = response_json.get('name')
+    plant_id = response_json.get('id')
+    core = Core()
+    core.save_data_measured_plant(plant_name=plant_name, plant_id=plant_id, m_data=)
+
+
 
 # Example usage
 # entry_id = 2  # Replace with the ID of the DataTable entry you want to update
@@ -82,4 +103,5 @@ def del_data_table_entry(entry_id):
 # }
 # print(add_data_table_entry(new_data))
 
-del_data_table_entry(entry_id=3)
+# print(del_data_table_entry(entry_id=8))
+get_user_plant_data(plant_id=1)
