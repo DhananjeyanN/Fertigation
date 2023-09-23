@@ -60,20 +60,21 @@ def del_data_table_entry(entry_id):
             return response.text
 
 
-def get_user_plant_data(plant_id):
-    url = f'http://127.0.0.1:8000/api/get_plant/{plant_id}/'
-    token = input('Enter token: ')
-    headers = {
-        'Authorization': f'Bearer {token}',
-        'Content-Type': 'application/json',
-    }
-    response = requests.get(url, headers=headers)
-    print(response.json())
-    response_json = response.json()
-    plant_name = response_json.get('name')
-    plant_id = response_json.get('id')
-    core = Core()
-    core.save_data_measured_plant(plant_name=plant_name, plant_id=plant_id, m_data=)
+# def get_user_plant_data(plant_id):
+#     url = f'http://127.0.0.1:8000/api/get_plant/{plant_id}/'
+#     token = input('Enter token: ')
+#     headers = {
+#         'Authorization': f'Bearer {token}',
+#         'Content-Type': 'application/json',
+#     }
+#     response = requests.get(url, headers=headers)
+#     print(response.json())
+#     response_json = response.json()
+#     plant_name = response_json.get('name')
+#     plant_id = response_json.get('id')
+#     core = Core()
+#     core.save_data_measured_plant(plant_name=plant_name, plant_id=plant_id)
+
 
 
 

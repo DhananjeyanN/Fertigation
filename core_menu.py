@@ -15,3 +15,5 @@ class CoreMenu():
     def get_token(self):
         self.token = input('Please Enter Token: ')
         requests.get()
+
+

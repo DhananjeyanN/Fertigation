@@ -6,7 +6,6 @@ from Database import DatabaseConfig
 import uuid
 
 from Plant import Plant
-from test1 import get_django_data
 
 
 class Core:
@@ -46,7 +45,7 @@ class Core:
         self.db.create_table(table_name='Plant', query=query3)
 
         query4 = 'CREATE TABLE IF NOT EXISTS LOCALPLANTDATA(row_id INT NOT NULL AUTO_INCREMENT, ' \
-                 'PRIMARY KEY(row_id), plant_name VARCHAR(100), plant_id VARCHAR(1000), m_ec DECIMAL(12,6), m_ph DECIMAL(12,6), ' \
+                 'PRIMARY KEY(row_id), plant_name VARCHAR(100), plant_id INT NOT NULL, m_ec DECIMAL(12,6), m_ph DECIMAL(12,6), ' \
                  'm_npk DECIMAL(12,6), m_temp DECIMAL(12,6), m_moist DECIMAL(12,6), date DATETIME);'
         self.db.create_table(table_name='Localplantdata', query=query4)
 
@@ -74,6 +73,34 @@ class Core:
         print(list(current_dict.keys()))
         print(row)
         self.db.insert_data(insert_query, row)
+
+    def fetch_plant_data(self, plant_id=None):
+        token = input('Enter token: ')
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json',
+        }
+        if plant_id != None:
+            url = f'http://127.0.0.1:8000/api/get_plant/{plant_id}/'
+            response = requests.get(url, headers=headers)
+            print(response.json())
+            response_json = response.json()
+            return response_json
+        else:
+            url = f'http://127.0.0.1:8000/api/get_all_plants/'
+            response = requests.get(url, headers=headers)
+            response_json = response.json()
+            print(response_json)
+            response_json = list(response_json.loads())
+            new_plant = {}
+            plant_fields = ['id', 'name', 'ec', 'ph', 'npk', 'temperature', 'ideal_moisture', 'fertilizer', 'plant_coefficient', 'user']
+            for plant in response_json:
+                for key in plant.keys():
+                    if key in plant_fields:
+                        new_plant[key] = plant.get(key)
+            print(new_plant)
+            return response_json
+
 
     def save_data_plant(self, plant_data):
         vals = []
@@ -133,14 +160,14 @@ class Core:
 # bean = Plant(hi.db)
 # bean.register_plant()
 # bean.save_data()
-app = Core()
-# app.save_data_plant(plant_data=get_django_data())
-app.save_data_measured_plant(plant_name='Banana', plant_id="1923", m_data={
-    'm_ec': 9.0,
-    'm_npk': 3.0,
-    'm_ph': 5.0,
-    'm_temp': 30.0,
-})
+# app = Core()
+# # app.save_data_plant(plant_data=get_django_data())
+# app.save_data_measured_plant(plant_name='Banana', plant_id="1923", m_data={
+#     'm_ec': 9.0,
+#     'm_npk': 3.0,
+#     'm_ph': 5.0,
+#     'm_temp': 30.0,
+# })
 
 
 # def update_plant_details(plant_id, updated_data):
@@ -175,3 +202,6 @@ app.save_data_measured_plant(plant_name='Banana', plant_id="1923", m_data={
 #     # ... add other fields as necessary
 # }
 # print(update_plant_details(plant_id, updated_data))
+
+core = Core()
+core.fetch_plant_data()
