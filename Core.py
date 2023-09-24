@@ -38,7 +38,7 @@ class Core:
                  'cloud INT, PRIMARY KEY(row_id));'
         self.db.create_table(table_name='Current', query=query2)
 
-        query3 = 'CREATE TABLE IF NOT EXISTS PLANT(row_id INT NOT NULL AUTO_INCREMENT, ' \
+        query3 = 'CREATE TABLE IF NOT EXISTS PLANT(plant_id INT NOT NULL, row_id INT NOT NULL AUTO_INCREMENT, ' \
                  'PRIMARY KEY(row_id), plant_name VARCHAR(100), ec VARCHAR(100), ph VARCHAR(100), ' \
                  'npk VARCHAR(100), temperature VARCHAR(100), ideal_moisture VARCHAR(100), fertilizer VARCHAR(100), ' \
                  'plant_coefficient DECIMAL(10,6));'
@@ -90,22 +90,26 @@ class Core:
             url = f'http://127.0.0.1:8000/api/get_all_plants/'
             response = requests.get(url, headers=headers)
             response_json = response.json()
-            print(response_json)
-            response_json = list(response_json.loads())
-            new_plant = {}
-            plant_fields = ['id', 'name', 'ec', 'ph', 'npk', 'temperature', 'ideal_moisture', 'fertilizer', 'plant_coefficient', 'user']
+            # print(response_json)
+            response_json = list(response_json)
+            plants = []
+            plant_fields = ['id', 'name', 'ec', 'ph', 'npk', 'temperature', 'ideal_moisture', 'fertilizer',
+                            'plant_coefficient', 'user']
             for plant in response_json:
+                new_plant = {}
                 for key in plant.keys():
                     if key in plant_fields:
                         new_plant[key] = plant.get(key)
-            print(new_plant)
-            return response_json
+                plants.append(new_plant)
+            return plants
 
+    def db_plant(self, plants):
+        self.save_data_plant(plant_data=plants)
 
     def save_data_plant(self, plant_data):
-        vals = []
         for plant in plant_data:
             print(plant)
+            vals = []
             for k, v in plant.items():
                 print(k, v)
                 if k == 'photo' or k == 'user':
@@ -113,14 +117,15 @@ class Core:
                 else:
                     print(k, v, 'hi')
                     vals.append(v)
-        print(vals)
-        try:
-            insert_query = "INSERT INTO PLANT(row_id, plant_name, ec, ph, npk, temperature, ideal_moisture, fertilizer, plant_coefficient) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-            self.db.insert_data(insert_query, vals)
-        except mysql.connector.IntegrityError:
-            pass
+            print(vals, 'dddd')
+            try:
+                insert_query = "INSERT INTO PLANT(plant_id, plant_name, ec, ph, npk, temperature, ideal_moisture, fertilizer, plant_coefficient) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                self.db.insert_data(insert_query, vals)
+            except mysql.connector.IntegrityError:
+                pass
 
-    def save_data_measured_plant(self, plant_name, plant_id, m_data):  # plant_id: send plant unique id, m_data: send dict with name and data
+    def save_data_measured_plant(self, plant_name, plant_id,
+                                 m_data):  # plant_id: send plant unique id, m_data: send dict with name and data
         vals = []
         m_ec = None
         m_ph = None
@@ -204,4 +209,4 @@ class Core:
 # print(update_plant_details(plant_id, updated_data))
 
 core = Core()
-core.fetch_plant_data()
+core.db_plant(plants=core.fetch_plant_data())
