@@ -1,7 +1,7 @@
 import mysql.connector
 import requests
 from datetime import datetime
-
+from ApiRequests import update_plant_entry
 from Database import DatabaseConfig
 import uuid
 
@@ -158,6 +158,20 @@ class Core:
         insert_query = "INSERT INTO LOCALPLANTDATA(plant_name, plant_id ,m_ec, m_ph, m_npk, m_temp, m_moist, date) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)"
         self.db.insert_data(insert_query, vals)
 
+    def sync_data_to_server(self):
+        local_plant_data = self.db.fetch_data('PLANT')
+        print(local_plant_data)
+        fields = ['plant', 'plant_name', 'ec', 'ph', 'npk', 'temperature', 'ideal_moisture', 'fertilizer', 'plant_coefficient']
+        for p in local_plant_data:
+            p = list(p)
+            p.pop(1)
+            p[8] = float(p[8])
+            plant_data = dict(zip(fields, p))
+            print(plant_data)
+            update_plant_entry(entry_id=plant_data['plant'], updated_data=plant_data)
+    # def sync_data_from_server(self):
+
+
 
 # hi = Core()
 # hi.get_forecast()
@@ -209,4 +223,5 @@ class Core:
 # print(update_plant_details(plant_id, updated_data))
 
 core = Core()
-core.db_plant(plants=core.fetch_plant_data())
+# core.db_plant(plants=core.fetch_plant_data())
+core.sync_data_to_server()

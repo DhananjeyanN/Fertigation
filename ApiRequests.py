@@ -1,5 +1,5 @@
 import requests
-from Core import Core
+
 
 def get_data_table_entries():
     url = 'http://127.0.0.1:8000/api/datatable'
@@ -8,8 +8,10 @@ def get_data_table_entries():
     print(data.json())
     return data.json()
 
-def update_data_table_entry(entry_id, updated_data):
+
+def update_plant_entry(entry_id, updated_data):
     url = f'http://127.0.0.1:8000/api/datatable/update/{entry_id}/'  # Assuming this is your endpoint
+    print(url)
     token = input('Enter Token')
 
     headers = {
@@ -43,22 +45,21 @@ def add_data_table_entry(new_data):
 
 
 def del_data_table_entry(entry_id):
-        url = f'http://127.0.0.1:8000/api/datatable/del/{entry_id}/'  # Assuming this is your endpoint
-        token = input('Enter Token')
+    url = f'http://127.0.0.1:8000/api/datatable/del/{entry_id}/'  # Assuming this is your endpoint
+    token = input('Enter Token')
 
-        headers = {
-            'Authorization': f'Bearer {token}',
-            'Content-Type': 'application/json',
-        }
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json',
+    }
 
-        response = requests.delete(url, headers=headers)
-        print(response.status_code)
-        print(response.text)
-        if response.status_code == 204:
-            return {'message': 'deleted succesfully!!!'}
-        else:
-            return response.text
-
+    response = requests.delete(url, headers=headers)
+    print(response.status_code)
+    print(response.text)
+    if response.status_code == 204:
+        return {'message': 'deleted succesfully!!!'}
+    else:
+        return response.text
 
 # def get_user_plant_data(plant_id):
 #     url = f'http://127.0.0.1:8000/api/get_plant/{plant_id}/'
@@ -74,8 +75,6 @@ def del_data_table_entry(entry_id):
 #     plant_id = response_json.get('id')
 #     core = Core()
 #     core.save_data_measured_plant(plant_name=plant_name, plant_id=plant_id)
-
-
 
 
 # Example usage
@@ -105,4 +104,4 @@ def del_data_table_entry(entry_id):
 # print(add_data_table_entry(new_data))
 
 # print(del_data_table_entry(entry_id=8))
-get_user_plant_data(plant_id=1)
+# get_user_plant_data(plant_id=1)
