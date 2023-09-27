@@ -161,14 +161,15 @@ class Core:
     def sync_data_to_server(self):
         local_plant_data = self.db.fetch_data('PLANT')
         print(local_plant_data)
-        fields = ['plant', 'plant_name', 'ec', 'ph', 'npk', 'temperature', 'ideal_moisture', 'fertilizer', 'plant_coefficient']
+        fields = ['plant', 'name', 'ec', 'ph', 'npk', 'temperature', 'ideal_moisture', 'fertilizer', 'plant_coefficient']
+        token = input("enter token:")
         for p in local_plant_data:
             p = list(p)
             p.pop(1)
             p[8] = float(p[8])
             plant_data = dict(zip(fields, p))
             print(plant_data)
-            update_plant_entry(entry_id=plant_data['plant'], updated_data=plant_data)
+            update_plant_entry(plant_id=plant_data['plant'], updated_data=plant_data, token=token)
     # def sync_data_from_server(self):
 
 

@@ -9,10 +9,29 @@ def get_data_table_entries():
     return data.json()
 
 
-def update_plant_entry(entry_id, updated_data):
+def update_data_table_entry(entry_id, updated_data):
     url = f'http://127.0.0.1:8000/api/datatable/update/{entry_id}/'  # Assuming this is your endpoint
     print(url)
     token = input('Enter Token')
+
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json',
+    }
+
+    response = requests.put(url, json=updated_data, headers=headers)
+    print(response.status_code)
+    print(response.text)
+
+    return response.json()
+
+
+def update_plant_entry(plant_id, updated_data, token = None):
+    url = f'http://127.0.0.1:8000/api/update_plant/{plant_id}/'  # Assuming this is your endpoint
+    if token is None:
+        token = input('Enter Token')
+    else:
+        pass
 
     headers = {
         'Authorization': f'Bearer {token}',
@@ -61,6 +80,7 @@ def del_data_table_entry(entry_id):
     else:
         return response.text
 
+
 # def get_user_plant_data(plant_id):
 #     url = f'http://127.0.0.1:8000/api/get_plant/{plant_id}/'
 #     token = input('Enter token: ')
@@ -78,8 +98,8 @@ def del_data_table_entry(entry_id):
 
 
 # Example usage
-# entry_id = 2  # Replace with the ID of the DataTable entry you want to update
-# plant_id = 1  # Replace with the ID of the Plant entry you want to update
+# entry_id = 6  # Replace with the ID of the DataTable entry you want to update
+# plant_id = 6  # Replace with the ID of the Plant entry you want to update
 # updated_data = {
 #     'plant': plant_id,  # assuming you want to associate this data with a specific plant
 #     'm_temp': 29.0,
@@ -89,7 +109,9 @@ def del_data_table_entry(entry_id):
 #     'm_ph': 1.5,
 #     # 'date_time': '2023-09-08T12:00:00Z'  # You don't need this for update as it's auto set on creation
 # }
-# print(update_data_table_entry(entry_id, updated_data))
+# print(update_plant_entry(entry_id, updated_data))
+
+
 
 # plant_id = 1  # Replace with the ID of the Plant entry you want to update
 # new_data = {
