@@ -44,8 +44,8 @@ class Core:
                  'plant_coefficient DECIMAL(10,6));'
         self.db.create_table(table_name='Plant', query=query3)
 
-        query4 = 'CREATE TABLE IF NOT EXISTS LOCALPLANTDATA(row_id INT NOT NULL AUTO_INCREMENT, ' \
-                 'PRIMARY KEY(row_id), plant_name VARCHAR(100), plant_id INT NOT NULL, m_ec DECIMAL(12,6), m_ph DECIMAL(12,6), ' \
+        query4 = 'CREATE TABLE IF NOT EXISTS LOCALPLANTDATA(row_id INT NOT NULL AUTO_INCREMENT, uuid VARCHAR(200), ' \
+                 'PRIMARY KEY(uuid), plant_name VARCHAR(100), plant_id INT NOT NULL, m_ec DECIMAL(12,6), m_ph DECIMAL(12,6), ' \
                  'm_npk DECIMAL(12,6), m_temp DECIMAL(12,6), m_moist DECIMAL(12,6), date DATETIME);'
         self.db.create_table(table_name='Localplantdata', query=query4)
 
@@ -124,8 +124,7 @@ class Core:
             except mysql.connector.IntegrityError:
                 pass
 
-    def save_data_measured_plant(self, plant_name, plant_id,
-                                 m_data):  # plant_id: send plant unique id, m_data: send dict with name and data
+    def save_data_measured_plant(self, plant_name, plant_id, m_data):  # plant_id: send plant unique id, m_data: send dict with name and data
         vals = []
         m_ec = None
         m_ph = None
@@ -146,6 +145,7 @@ class Core:
                 m_moist = data
             else:
                 print('No Data!!!')
+        vals.append(str(uuid.uuid4())[:100])
         vals.append(plant_name)
         vals.append(plant_id)
         vals.append(m_ec)
@@ -155,21 +155,30 @@ class Core:
         vals.append(m_moist)
         vals.append(date)
         print(vals)
-        insert_query = "INSERT INTO LOCALPLANTDATA(plant_name, plant_id ,m_ec, m_ph, m_npk, m_temp, m_moist, date) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)"
+        insert_query = "INSERT INTO LOCALPLANTDATA(uuid, plant_name, plant_id ,m_ec, m_ph, m_npk, m_temp, m_moist, date) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)"
         self.db.insert_data(insert_query, vals)
 
     def sync_data_to_server(self):
-        local_plant_data = self.db.fetch_data('PLANT')
+        local_plant_data = self.db.fetch_data('LOCALPLANTDATA')
         print(local_plant_data)
-        fields = ['plant', 'name', 'ec', 'ph', 'npk', 'temperature', 'ideal_moisture', 'fertilizer', 'plant_coefficient']
+        fields = ['plant_id', 'm_temp', 'm_moist', 'm_ec', 'm_npk', 'm_ph', 'date_time']
         token = input("enter token:")
+        new_p = []
         for p in local_plant_data:
             p = list(p)
-            p.pop(1)
-            p[8] = float(p[8])
-            plant_data = dict(zip(fields, p))
+            print(p)
+            del p[0:2]
+            new_p.append(p[0])
+            new_p.append(p[4])
+            new_p.append(p[5])
+            new_p.append(p[1])
+            new_p.append(p[3])
+            new_p.append(p[2])
+            new_p.append(p[-1])
+            print(new_p, 'dsad')
+            plant_data = dict(zip(fields, new_p))
             print(plant_data)
-            update_plant_entry(plant_id=plant_data['plant'], updated_data=plant_data, token=token)
+            update_plant_entry(plant_id=plant_data['plant_id'], updated_data=plant_data, token=token)
     # def sync_data_from_server(self):
 
 
@@ -225,4 +234,5 @@ class Core:
 
 core = Core()
 # core.db_plant(plants=core.fetch_plant_data())
-core.sync_data_to_server()
+# core.sync_data_to_server()
+core.save_data_measured_plant(plant_name='Banana', plant_id=2, m_data={'m_ec':2, 'm_ph':11, 'm_npk':123})
