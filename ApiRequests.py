@@ -37,7 +37,6 @@ def update_plant_entry(plant_id, updated_data, token = None):
         'Authorization': f'Bearer {token}',
         'Content-Type': 'application/json',
     }
-
     response = requests.put(url, json=updated_data, headers=headers)
     print(response.status_code)
     print(response.text)
