@@ -9,10 +9,9 @@ def get_data_table_entries():
     return data.json()
 
 
-def update_data_table_entry(entry_id, updated_data):
+def update_data_table_entry(entry_id, updated_data, token):
     url = f'http://127.0.0.1:8000/api/datatable/update/{entry_id}/'  # Assuming this is your endpoint
     print(url)
-    token = input('Enter Token')
 
     headers = {
         'Authorization': f'Bearer {token}',

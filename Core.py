@@ -1,7 +1,7 @@
 import mysql.connector
 import requests
 from datetime import datetime
-from ApiRequests import update_plant_entry
+from ApiRequests import update_plant_entry, update_data_table_entry
 from Database import DatabaseConfig
 import uuid
 
@@ -171,16 +171,16 @@ class Core:
             print(p, 'ppppppppp')
             new_p.append(p[2]) #plant_id
             new_p.append(p[0]) #uuid
-            new_p.append(float(p[6])) #m_temp
-            new_p.append(float(p[7])) #m_moist
-            new_p.append(float(p[3])) #m_ec
-            new_p.append(float(p[5])) #m_npk
-            new_p.append(float(p[4])) #m_ph
-            new_p.append(p[-1]) #datetime
+            new_p.append(str(p[6])) #m_temp
+            new_p.append(str(p[7])) #m_moist
+            new_p.append(str(p[3])) #m_ec
+            new_p.append(str(p[5])) #m_npk
+            new_p.append(str(p[4])) #m_ph
+            new_p.append(str(p[-1])) #datetime
             print(new_p, 'dsad')
             plant_data = dict(zip(fields, new_p))
             print(plant_data)
-            update_plant_entry(plant_id=plant_data['plant_id'], updated_data=plant_data, token=token)
+            update_data_table_entry(entry_id=plant_data['uuid'], updated_data=plant_data, token=token)
     # def sync_data_from_server(self):
 
 
@@ -237,4 +237,4 @@ class Core:
 core = Core()
 # core.db_plant(plants=core.fetch_plant_data())
 core.sync_data_to_server()
-core.save_data_measured_plant(plant_name='Banana', plant_id=2, m_data={'m_ec':999, 'm_ph':11, 'm_npk':123})
+# core.save_data_measured_plant(plant_name='Banana', plant_id=2, m_data={'m_ec':999, 'm_ph':11, 'm_npk':123})
