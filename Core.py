@@ -1,7 +1,7 @@
 import mysql.connector
 import requests
 from datetime import datetime
-from ApiRequests import update_plant_entry, update_data_table_entry
+from ApiRequests import update_plant_entry, update_data_table_entry, add_data_table_entry
 from Database import DatabaseConfig
 import uuid
 
@@ -166,9 +166,7 @@ class Core:
         new_p = []
         for p in local_plant_data:
             p = list(p)
-            print(p)
             del p[0:1]
-            print(p, 'ppppppppp')
             new_p.append(p[2]) #plant_id
             new_p.append(p[0]) #uuid
             new_p.append(str(p[6])) #m_temp
@@ -180,7 +178,15 @@ class Core:
             print(new_p, 'dsad')
             plant_data = dict(zip(fields, new_p))
             print(plant_data)
-            update_data_table_entry(entry_id=plant_data['uuid'], updated_data=plant_data, token=token)
+            is_found = False
+            try:
+                update_data_table_entry(entry_id=plant_data['uuid'], updated_data=plant_data, token=token)
+                is_found = True
+            except Exception as e:
+                print(e)
+            if not is_found:
+                print('CREATING DATA TABLE')
+                add_data_table_entry(plant_data)
     # def sync_data_from_server(self):
 
 
