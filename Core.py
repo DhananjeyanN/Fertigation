@@ -124,7 +124,8 @@ class Core:
             except mysql.connector.IntegrityError:
                 pass
 
-    def save_data_measured_plant(self, plant_name, plant_id, m_data):  # plant_id: send plant unique id, m_data: send dict with name and data
+    def save_data_measured_plant(self, plant_name, plant_id,
+                                 m_data):  # plant_id: send plant unique id, m_data: send dict with name and data
         vals = []
         m_ec = None
         m_ph = None
@@ -160,34 +161,49 @@ class Core:
 
     def sync_data_to_server(self):
         local_plant_data = self.db.fetch_data('LOCALPLANTDATA')
-        print(local_plant_data)
         fields = ['plant_id', 'uuid', 'm_temp', 'm_moist', 'm_ec', 'm_npk', 'm_ph', 'date_time']
         token = input("enter token:")
-        new_p = []
+        print(local_plant_data, 'lpd')
         for p in local_plant_data:
             p = list(p)
+            print('local_plant_data')
+            new_p = []
             del p[0:1]
-            new_p.append(p[2]) #plant_id
-            new_p.append(p[0]) #uuid
-            new_p.append(str(p[6])) #m_temp
-            new_p.append(str(p[7])) #m_moist
-            new_p.append(str(p[3])) #m_ec
-            new_p.append(str(p[5])) #m_npk
-            new_p.append(str(p[4])) #m_ph
-            new_p.append(str(p[-1])) #datetime
-            print(new_p, 'dsad')
+            new_p.append(p[2])  # plant_id
+            new_p.append(p[0])  # uuid
+            new_p.append(str(p[6]))  # m_temp
+            new_p.append(str(p[7]))  # m_moist
+            new_p.append(str(p[3]))  # m_ec
+            new_p.append(str(p[5]))  # m_npk
+            new_p.append(str(p[4]))  # m_ph
+            new_p.append(str(p[-1]))  # datetime
             plant_data = dict(zip(fields, new_p))
-            print(plant_data)
-            is_found = False
-            try:
-                update_data_table_entry(entry_id=plant_data['uuid'], updated_data=plant_data, token=token)
-                is_found = True
-            except Exception as e:
-                print(e)
-            if not is_found:
+            res= update_data_table_entry(entry_id=plant_data['uuid'], updated_data=plant_data, token=token)
+            print(res.status_code, 'ffffff')
+            if res.status_code == 404:
+
                 print('CREATING DATA TABLE')
-                add_data_table_entry(plant_data)
-    # def sync_data_from_server(self):
+                print(plant_data)
+                add_data_table_entry(new_data=plant_data, token=token)
+
+    def sync_data_from_server(self):
+        plant_data = self.fetch_plant_data()
+        print(plant_data)
+        for plant in plant_data:
+            vals = []
+            for k, v in plant.items():
+                if k not in ['photo', 'user']:
+                    vals.append(v)
+            print(vals)
+            try:
+                insert_query = "INSERT INTO PLANT(plant_id, plant_name, ec, ph, npk, temperature, ideal_moisture, fertilizer, plant_coefficient) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE plant_name = VALUES(plant_name), ec = VALUES(ec), ph = VALUES(ph), npk = VALUES(npk), temperature = VALUES(temperature), ideal_moisture = VALUES(ideal_moisture), fertilizer = VALUES(fertilizer), plant_coefficient = VALUES(plant_coefficient)"
+                self.db.insert_data(insert_query, vals)
+            except mysql.connector.Error as e:
+                print(f'an error occurred {e}')
+
+        # plant_data = self.fetch_plant_data()
+        # print(plant_data)
+        # self.save_data_plant(plant_data=plant_data)
 
 
 
@@ -242,5 +258,6 @@ class Core:
 
 core = Core()
 # core.db_plant(plants=core.fetch_plant_data())
-core.sync_data_to_server()
+# core.sync_data_to_server()
 # core.save_data_measured_plant(plant_name='Banana', plant_id=2, m_data={'m_ec':999, 'm_ph':11, 'm_npk':123})
+core.sync_data_from_server()

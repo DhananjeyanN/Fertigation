@@ -22,7 +22,7 @@ def update_data_table_entry(entry_id, updated_data, token):
     print(response.status_code)
     print(response.text)
 
-    return response.json()
+    return response
 
 
 def update_plant_entry(plant_id, updated_data, token = None):
@@ -43,9 +43,8 @@ def update_plant_entry(plant_id, updated_data, token = None):
     return response.json()
 
 
-def add_data_table_entry(new_data):
+def add_data_table_entry(new_data, token):
     url = f'http://127.0.0.1:8000/api/datatable/add/'  # Assuming this is your endpoint
-    token = input('Enter Token')
 
     headers = {
         'Authorization': f'Bearer {token}',
