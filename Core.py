@@ -38,7 +38,7 @@ class Core:
                  'cloud INT, PRIMARY KEY(row_id));'
         self.db.create_table(table_name='Current', query=query2)
 
-        query3 = 'CREATE TABLE IF NOT EXISTS PLANT(plant_id INT NOT NULL, row_id INT NOT NULL AUTO_INCREMENT, ' \
+        query3 = 'CREATE TABLE IF NOT EXISTS PLANT(plant_id INT NOT NULL UNIQUE, row_id INT NOT NULL AUTO_INCREMENT, ' \
                  'PRIMARY KEY(row_id), plant_name VARCHAR(100), ec VARCHAR(100), ph VARCHAR(100), ' \
                  'npk VARCHAR(100), temperature VARCHAR(100), ideal_moisture VARCHAR(100), fertilizer VARCHAR(100), ' \
                  'plant_coefficient DECIMAL(10,6));'
@@ -90,18 +90,22 @@ class Core:
             url = f'http://127.0.0.1:8000/api/get_all_plants/'
             response = requests.get(url, headers=headers)
             response_json = response.json()
-            # print(response_json)
-            response_json = list(response_json)
-            plants = []
-            plant_fields = ['id', 'name', 'ec', 'ph', 'npk', 'temperature', 'ideal_moisture', 'fertilizer',
-                            'plant_coefficient', 'user']
-            for plant in response_json:
-                new_plant = {}
-                for key in plant.keys():
-                    if key in plant_fields:
-                        new_plant[key] = plant.get(key)
-                plants.append(new_plant)
-            return plants
+            print(response_json)
+            if response.status_code == 200:
+                response_json = list(response_json)
+                plants = []
+                plant_fields = ['id', 'name', 'ec', 'ph', 'npk', 'temperature', 'ideal_moisture', 'fertilizer',
+                                'plant_coefficient', 'user']
+                for plant in response_json:
+                    print(type(plant), plant, 'hiiii')
+                    new_plant = {}
+                    for key in plant.keys():
+                        if key in plant_fields:
+                            new_plant[key] = plant.get(key)
+                    plants.append(new_plant)
+                return plants
+            else:
+                print('NO PLANT FOUND')
 
     def db_plant(self, plants):
         self.save_data_plant(plant_data=plants)
