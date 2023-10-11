@@ -74,8 +74,7 @@ class Core:
         print(row)
         self.db.insert_data(insert_query, row)
 
-    def fetch_plant_data(self, plant_id=None):
-        token = input('Enter token: ')
+    def fetch_plant_data(self, plant_id=None, token=None):
         headers = {
             'Authorization': f'Bearer {token}',
             'Content-Type': 'application/json',
@@ -106,6 +105,7 @@ class Core:
                 return plants
             else:
                 print('NO PLANT FOUND')
+                return None
 
     def db_plant(self, plants):
         self.save_data_plant(plant_data=plants)
@@ -182,10 +182,9 @@ class Core:
             new_p.append(str(p[4]))  # m_ph
             new_p.append(str(p[-1]))  # datetime
             plant_data = dict(zip(fields, new_p))
-            res= update_data_table_entry(entry_id=plant_data['uuid'], updated_data=plant_data, token=token)
+            res = update_data_table_entry(entry_id=plant_data['uuid'], updated_data=plant_data, token=token)
             print(res.status_code, 'ffffff')
             if res.status_code == 404:
-
                 print('CREATING DATA TABLE')
                 print(plant_data)
                 add_data_table_entry(new_data=plant_data, token=token)
@@ -205,10 +204,23 @@ class Core:
             except mysql.connector.Error as e:
                 print(f'an error occurred {e}')
 
+    def is_token_valid(self, token):
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json',
+        }
+        url = f'http://127.0.0.1:8000/api/get_all_plants/'
+        response = requests.get(url, headers=headers)
+        response_json = response.json()
+        print(response_json, type(response_json),'response_json')
+        if response_json[0]['detail'] == 'Given token not valid for any token type':
+            return False
+        else:
+            return True
+
         # plant_data = self.fetch_plant_data()
         # print(plant_data)
         # self.save_data_plant(plant_data=plant_data)
-
 
 
 # hi = Core()
@@ -260,8 +272,8 @@ class Core:
 # }
 # print(update_plant_details(plant_id, updated_data))
 
-core = Core()
+# core = Core()
 # core.db_plant(plants=core.fetch_plant_data())
 # core.sync_data_to_server()
 # core.save_data_measured_plant(plant_name='Banana', plant_id=2, m_data={'m_ec':999, 'm_ph':11, 'm_npk':123})
-core.sync_data_from_server()
+# core.fetch_plant_data(token=input())
