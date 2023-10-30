@@ -40,13 +40,13 @@ class Core:
 
         query3 = 'CREATE TABLE IF NOT EXISTS PLANT(plant_id INT NOT NULL UNIQUE, row_id INT NOT NULL AUTO_INCREMENT, ' \
                  'PRIMARY KEY(row_id), plant_name VARCHAR(100), ec VARCHAR(100), ph VARCHAR(100), ' \
-                 'npk VARCHAR(100), temperature VARCHAR(100), ideal_moisture VARCHAR(100), fertilizer VARCHAR(100), ' \
+                 'nitrogen VARCHAR(100), phosphorus VARCHAR(100), potassium VARCHAR(100), temperature VARCHAR(100), ideal_moisture VARCHAR(100), fertilizer VARCHAR(100), ' \
                  'plant_coefficient DECIMAL(10,6));'
         self.db.create_table(table_name='Plant', query=query3)
 
         query4 = 'CREATE TABLE IF NOT EXISTS LOCALPLANTDATA(row_id INT NOT NULL AUTO_INCREMENT, uuid VARCHAR(200) NOT NULL UNIQUE, ' \
                  'PRIMARY KEY(row_id), plant_name VARCHAR(100), plant_id INT NOT NULL, m_ec DECIMAL(12,6), m_ph DECIMAL(12,6), ' \
-                 'm_npk DECIMAL(12,6), m_temp DECIMAL(12,6), m_moist DECIMAL(12,6), date DATETIME);'
+                 'm_nitrogen DECIMAL(12,6), m_phosphorus DECIMAL(12,6), m_potassium DECIMAL(12,6), m_temp DECIMAL(12,6), m_moist DECIMAL(12,6), date DATETIME);'
         self.db.create_table(table_name='Localplantdata', query=query4)
 
     def save_data(self, weather_data):
@@ -93,10 +93,9 @@ class Core:
             if response.status_code == 200:
                 response_json = list(response_json)
                 plants = []
-                plant_fields = ['id', 'name', 'ec', 'ph', 'npk', 'temperature', 'ideal_moisture', 'fertilizer',
+                plant_fields = ['id', 'name', 'ec', 'ph', 'nitrogen', 'phosphorus', 'potassium', 'temperature', 'ideal_moisture', 'fertilizer',
                                 'plant_coefficient', 'user']
                 for plant in response_json:
-                    print(type(plant), plant, 'hiiii')
                     new_plant = {}
                     for key in plant.keys():
                         if key in plant_fields:
@@ -115,7 +114,6 @@ class Core:
             print(plant)
             vals = []
             for k, v in plant.items():
-                print(k, v)
                 if k == 'photo' or k == 'user':
                     pass
                 else:
@@ -123,17 +121,18 @@ class Core:
                     vals.append(v)
             print(vals, 'dddd')
             try:
-                insert_query = "INSERT INTO PLANT(plant_id, plant_name, ec, ph, npk, temperature, ideal_moisture, fertilizer, plant_coefficient) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                insert_query = "INSERT INTO PLANT(plant_id, plant_name, ec, ph, nitrogen, phosphorus, potassium, temperature, ideal_moisture, fertilizer, plant_coefficient) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
                 self.db.insert_data(insert_query, vals)
             except mysql.connector.IntegrityError:
                 pass
 
-    def save_data_measured_plant(self, plant_name, plant_id,
-                                 m_data):  # plant_id: send plant unique id, m_data: send dict with name and data
+    def save_data_measured_plant(self, plant_name, plant_id, m_data):  # plant_id: send plant unique id, m_data: send dict with name and data
         vals = []
         m_ec = None
         m_ph = None
-        m_npk = None
+        m_nitrogen = None
+        m_phosphorus = None
+        m_potassium = None
         m_temp = None
         m_moist = None
         date = datetime.now()
@@ -142,8 +141,12 @@ class Core:
                 m_ec = data
             elif name == 'm_ph':
                 m_ph = data
-            elif name == 'm_npk':
-                m_npk = data
+            elif name == 'm_nitrogen':
+                m_nitrogen = data
+            elif name == 'm_phosphorus':
+                m_phosphorus = data
+            elif name == 'm_potassium':
+                m_potassium = data
             elif name == 'm_temp':
                 m_temp = data
             elif name == 'm_moist':
@@ -155,17 +158,19 @@ class Core:
         vals.append(plant_id)
         vals.append(m_ec)
         vals.append(m_ph)
-        vals.append(m_npk)
+        vals.append(m_nitrogen)
+        vals.append(m_phosphorus)
+        vals.append(m_potassium)
         vals.append(m_temp)
         vals.append(m_moist)
         vals.append(date)
         print(vals)
-        insert_query = "INSERT INTO LOCALPLANTDATA(uuid, plant_name, plant_id ,m_ec, m_ph, m_npk, m_temp, m_moist, date) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        insert_query = "INSERT INTO LOCALPLANTDATA(uuid, plant_name, plant_id ,m_ec, m_ph, m_nitrogen, m_phosphorus, m_potassium, m_temp, m_moist, date) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         self.db.insert_data(insert_query, vals)
 
     def sync_data_to_server(self):
         local_plant_data = self.db.fetch_data('LOCALPLANTDATA')
-        fields = ['plant_id', 'uuid', 'm_temp', 'm_moist', 'm_ec', 'm_npk', 'm_ph', 'date_time']
+        fields = ['plant_id', 'uuid', 'm_temp', 'm_moist', 'm_ec', 'm_nitrogen', 'm_phosphorus', 'm_potassium', 'm_ph', 'date_time']
         token = input("enter token:")
         print(local_plant_data, 'lpd')
         for p in local_plant_data:
@@ -173,12 +178,15 @@ class Core:
             print('local_plant_data')
             new_p = []
             del p[0:1]
+            print(new_p, 'hello')
             new_p.append(p[2])  # plant_id
             new_p.append(p[0])  # uuid
-            new_p.append(str(p[6]))  # m_temp
-            new_p.append(str(p[7]))  # m_moist
+            new_p.append(str(p[8]))  # m_temp
+            new_p.append(str(p[9]))  # m_moist
             new_p.append(str(p[3]))  # m_ec
-            new_p.append(str(p[5]))  # m_npk
+            new_p.append(str(p[5]))  # m_nitrogen
+            new_p.append(str(p[6]))  # m_phosphorus
+            new_p.append(str(p[7]))  # m_potassium
             new_p.append(str(p[4]))  # m_ph
             new_p.append(str(p[-1]))  # datetime
             plant_data = dict(zip(fields, new_p))
@@ -190,16 +198,14 @@ class Core:
                 add_data_table_entry(new_data=plant_data, token=token)
 
     def sync_data_from_server(self):
-        plant_data = self.fetch_plant_data()
-        print(plant_data)
+        plant_data = self.fetch_plant_data(token=input('Enter Token: '))
         for plant in plant_data:
             vals = []
             for k, v in plant.items():
                 if k not in ['photo', 'user']:
                     vals.append(v)
-            print(vals)
             try:
-                insert_query = "INSERT INTO PLANT(plant_id, plant_name, ec, ph, npk, temperature, ideal_moisture, fertilizer, plant_coefficient) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE plant_name = VALUES(plant_name), ec = VALUES(ec), ph = VALUES(ph), npk = VALUES(npk), temperature = VALUES(temperature), ideal_moisture = VALUES(ideal_moisture), fertilizer = VALUES(fertilizer), plant_coefficient = VALUES(plant_coefficient)"
+                insert_query = "INSERT INTO PLANT(plant_id, plant_name, ec, ph, nitrogen, phosphorus, potassium, temperature, ideal_moisture, fertilizer, plant_coefficient) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE plant_name = VALUES(plant_name), ec = VALUES(ec), ph = VALUES(ph), nitrogen = VALUES(nitrogen), phosphorus = VALUES(phosphorus), potassium = VALUES(potassium), temperature = VALUES(temperature), ideal_moisture = VALUES(ideal_moisture), fertilizer = VALUES(fertilizer), plant_coefficient = VALUES(plant_coefficient)"
                 self.db.insert_data(insert_query, vals)
             except mysql.connector.Error as e:
                 print(f'an error occurred {e}')
@@ -212,8 +218,7 @@ class Core:
         url = f'http://127.0.0.1:8000/api/get_all_plants/'
         response = requests.get(url, headers=headers)
         response_json = response.json()
-        print(response_json, type(response_json),'response_json')
-        if response_json[0]['detail'] == 'Given token not valid for any token type':
+        if response.status_code != 200 and response_json['detail'] == 'Given token not valid for any token type':
             return False
         else:
             return True
@@ -231,9 +236,11 @@ class Core:
 # bean.save_data()
 # app = Core()
 # # app.save_data_plant(plant_data=get_django_data())
-# app.save_data_measured_plant(plant_name='Banana', plant_id="1923", m_data={
+# app.save_data_measured_plant(plant_name='Bean', plant_id="2", m_data={
 #     'm_ec': 9.0,
-#     'm_npk': 3.0,
+#     'm_nitrogen': 3.0,
+#     'm_phosphorus': 2.0,
+#     'm_potassium': 1.0,
 #     'm_ph': 5.0,
 #     'm_temp': 30.0,
 # })
@@ -273,7 +280,12 @@ class Core:
 # print(update_plant_details(plant_id, updated_data))
 
 # core = Core()
-# core.db_plant(plants=core.fetch_plant_data())
+# # print('hello')
+# # # core.db_plant(plants=core.fetch_plant_data())
+# # # core.sync_data_to_server()
+# # # data = core.fetch_plant_data(plant_id=2, token=' eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjo0ODUxNTQ2ODMwLCJpYXQiOjE2OTc5NDY4MzAsImp0aSI6IjdiODc4MDY5ZTczZDRmZTk4Zjc5YzljNmYxMzk2YTVlIiwidXNlcl9pZCI6NH0.UKaNz5_8rSmmuLdEUeguGGuI_TaQx9xhaJ5fMLTsJgY')
+# # #
+# # # core.save_data_plant(plant_data=[data])
 # core.sync_data_to_server()
 # core.save_data_measured_plant(plant_name='Banana', plant_id=2, m_data={'m_ec':999, 'm_ph':11, 'm_npk':123})
 # core.fetch_plant_data(token=input())

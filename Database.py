@@ -6,14 +6,14 @@ load_dotenv()
 
 
 class DatabaseConfig():
-    def __init__(self):
+    def __init__(self, db_name = None):
         self.host = os.getenv("host")
         self.user = os.getenv("user")
         self.password = os.getenv("password")
         self.port = os.getenv("port")
         self.connection = None
         self.cursor = None
-        self.database_name = None
+        self.database_name = db_name
         self.account_num = 0
 
     def connect(self):
@@ -46,14 +46,26 @@ class DatabaseConfig():
     def drop_table(self, table_name):
         self.cursor.execute(f"DROP TABLE {table_name}")
 
-    def use_database(self):
-        self.cursor.execute(f"USE {self.database_name}")
+    def use_database(self, db_name = None):
+        if db_name is None:
+            self.cursor.execute(f"USE {self.database_name}")
+        else:
+            self.cursor.execute(f"USE {db_name}")
+            self.database_name = db_name
+
 
     def fetch_data(self, table_name):
         self.use_database()
         fetch_query = f"SELECT * FROM {table_name}"
         self.cursor.execute(fetch_query)
         data = self.cursor.fetchall()
+        return data
+
+    def check_table_id(self, table_name, pk): #pk is unique id to filter with
+        self.use_database()
+        fetch_query = f"SELECT * FROM {table_name}"
+        self.cursor.execute(fetch_query)
+        data = self.cursor.fetchone()
         return data
 
     def create_tables(self, query_list, table_names):

@@ -43,7 +43,9 @@ def update_plant_entry(plant_id, updated_data, token = None):
     return response.json()
 
 
-def add_data_table_entry(new_data, token):
+def add_data_table_entry(new_data, token= None):
+    if token is None:
+        token = input('Enter Token: ')
     url = f'http://127.0.0.1:8000/api/datatable/add/'  # Assuming this is your endpoint
 
     headers = {
@@ -110,14 +112,16 @@ def del_data_table_entry(entry_id):
 
 
 
-# plant_id = 1  # Replace with the ID of the Plant entry you want to update
+# plant_id = 2  # Replace with the ID of the Plant entry you want to update
 # new_data = {
-#     'plant': plant_id,  # assuming you want to associate this data with a specific plant
-#     'm_temp': 1.0,
-#     'm_moist': 90.0,
-#     'm_ec': 9.2,
-#     'm_npk': 3.0,
-#     'm_ph': 2.5,
+#     'plant_id': plant_id,  # assuming you want to associate this data with a specific plant
+#     'm_temp': 90.0,
+#     'm_moist': 10.0,
+#     'm_ec': 4.2,
+#     'm_nitrogen': 1.0,
+#     'm_phosphorus': 2.0,
+#     'm_potassium': 3.0,
+#     'm_ph': 4.5,
 #     # 'date_time': '2023-09-08T12:00:00Z'  # You don't need this for update as it's auto set on creation
 # }
 # print(add_data_table_entry(new_data))
