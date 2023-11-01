@@ -169,6 +169,7 @@ class Core:
         self.db.insert_data(insert_query, vals)
 
     def sync_data_to_server(self):
+        print('BEANS')
         local_plant_data = self.db.fetch_data('LOCALPLANTDATA')
         fields = ['plant_id', 'uuid', 'm_temp', 'm_moist', 'm_ec', 'm_nitrogen', 'm_phosphorus', 'm_potassium', 'm_ph', 'date_time']
         token = input("enter token:")
@@ -190,6 +191,7 @@ class Core:
             new_p.append(str(p[4]))  # m_ph
             new_p.append(str(p[-1]))  # datetime
             plant_data = dict(zip(fields, new_p))
+            print(plant_data, 'SENDING DATA')
             res = update_data_table_entry(entry_id=plant_data['uuid'], updated_data=plant_data, token=token)
             print(res.status_code, 'ffffff')
             if res.status_code == 404:

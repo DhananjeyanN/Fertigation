@@ -38,7 +38,9 @@ class CoreMenu():
                 plant_id = sensor.plant_id
                 plant = self.database.check_table_id(table_name='PLANT', pk=plant_id)
                 if plant:
+
                     self.core.save_data_measured_plant(plant_name=plant.plant_name, plant_id=plant_id, m_data={'m_moist': s_data})
+                    self.core.sync_data_to_server()
                 else:
                     return 'No Plant Found!!!'
         else:
@@ -47,10 +49,11 @@ class CoreMenu():
                     s_data = sensor.collect_data()
                     plant_id = sensor.plant_id
                     plant = self.database.check_table_id(table_name='PLANT', pk=plant_id)
-                    print(plant)
+                    print(plant, 'PLANT')
                     if plant:
                         self.core.save_data_measured_plant(plant_name=plant[2], plant_id=plant_id,
                                                            m_data={'m_moist': s_data})
+                        self.core.sync_data_to_server()
                     else:
                         return 'No Plant Found!!!'
 
@@ -66,4 +69,4 @@ menu = CoreMenu()
 
 menu.add_sensor()
 
-menu.collect_data(sensor_p=2)
+print(menu.collect_data(sensor_p=14))

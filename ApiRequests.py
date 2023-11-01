@@ -52,9 +52,9 @@ def add_data_table_entry(new_data, token= None):
         'Authorization': f'Bearer {token}',
         'Content-Type': 'application/json',
     }
-
+    print(new_data)
     response = requests.post(url, json=new_data, headers=headers)
-    print(response.status_code)
+    print(response.status_code, 'ADDING DATA')
     print(response.text)
     if response.status_code == 201:
         return response.json()
