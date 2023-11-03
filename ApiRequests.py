@@ -26,7 +26,7 @@ def update_data_table_entry(entry_id, updated_data, token):
 
 
 def update_plant_entry(plant_id, updated_data, token = None):
-    url = f'http://127.0.0.1:8000/api/update_plant/{plant_id}/'  # Assuming this is your endpoint
+    url = f'http://127.0.0.1:8000/api/datatable/update/{plant_id}/'  # Assuming this is your endpoint
     if token is None:
         token = input('Enter Token')
     else:

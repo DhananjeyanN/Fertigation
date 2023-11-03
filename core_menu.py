@@ -69,4 +69,4 @@ menu = CoreMenu()
 
 menu.add_sensor()
 
-print(menu.collect_data(sensor_p=14))
+print(menu.collect_data(sensor_p=1))
