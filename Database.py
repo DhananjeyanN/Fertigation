@@ -46,6 +46,11 @@ class DatabaseConfig():
     def drop_table(self, table_name):
         self.cursor.execute(f"DROP TABLE {table_name}")
 
+    def drop_record(self, record_id, table_name):
+        query = f'DELETE FROM {table_name} WHERE plant_id is {record_id}'
+        self.cursor.execute(query)
+        print('ITEM DELETED')
+
     def use_database(self, db_name = None):
         if db_name is None:
             self.cursor.execute(f"USE {self.database_name}")
@@ -61,6 +66,10 @@ class DatabaseConfig():
         data = self.cursor.fetchall()
         return data
 
+    def fetch_one(self, query):
+        self.cursor.execute(query)
+        record = self.cursor.fetchone()
+        return record
     def check_table_id(self, table_name, pk): #pk is unique id to filter with
         self.use_database()
         fetch_query = f"SELECT * FROM {table_name}"

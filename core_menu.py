@@ -57,6 +57,10 @@ class CoreMenu():
                     else:
                         return 'No Plant Found!!!'
 
+    def get_plant_data(self):
+        self.core.sync_data_from_server(token=self.token)
+
+
 
 
 
@@ -68,5 +72,5 @@ start = 'Hello'
 menu = CoreMenu()
 
 menu.add_sensor()
-
+menu.get_plant_data()
 print(menu.collect_data(sensor_p=1))

@@ -199,14 +199,27 @@ class Core:
                 print(plant_data)
                 add_data_table_entry(new_data=plant_data, token=token)
 
-    def sync_data_from_server(self):
-        plant_data = self.fetch_plant_data(token=input('Enter Token: '))
+    def sync_data_from_server(self, token=None):
+        plants = self.db.fetch_data(table_name='PLANT')
+        print(plants, 'PLANTS')
+        plants_ids = [plant[0] for plant in plants]
+        print(plants_ids)
+        if token == None:
+            plant_data = self.fetch_plant_data(token=input('Enter Token: '))
+        else:
+            plant_data = self.fetch_plant_data(token=token)
+        print(plant_data, 'PLANT DATA')
         for plant in plant_data:
             vals = []
             for k, v in plant.items():
                 if k not in ['photo', 'user']:
+                    if k == 'id':
+                        plants_ids.remove(v)
                     vals.append(v)
+            print(vals, 'VALSS')
             try:
+                if plants_ids
+                self.db.drop_record(record_id=plants_ids)
                 insert_query = "INSERT INTO PLANT(plant_id, plant_name, ec, ph, nitrogen, phosphorus, potassium, temperature, ideal_moisture, fertilizer, plant_coefficient) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE plant_name = VALUES(plant_name), ec = VALUES(ec), ph = VALUES(ph), nitrogen = VALUES(nitrogen), phosphorus = VALUES(phosphorus), potassium = VALUES(potassium), temperature = VALUES(temperature), ideal_moisture = VALUES(ideal_moisture), fertilizer = VALUES(fertilizer), plant_coefficient = VALUES(plant_coefficient)"
                 self.db.insert_data(insert_query, vals)
             except mysql.connector.Error as e:
