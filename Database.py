@@ -46,8 +46,8 @@ class DatabaseConfig():
     def drop_table(self, table_name):
         self.cursor.execute(f"DROP TABLE {table_name}")
 
-    def drop_record(self, record_id, table_name):
-        query = f'DELETE FROM {table_name} WHERE plant_id is {record_id}'
+    def drop_record(self, record_id, table_name='PLANT', pk='plant_id'):
+        query = f'DELETE FROM {table_name} WHERE {pk} = {record_id}'
         self.cursor.execute(query)
         print('ITEM DELETED')
 

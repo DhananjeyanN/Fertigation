@@ -11,7 +11,6 @@ class CoreMenu():
         self.get_url = 'http://127.0.0.1:8000/api/datatable'
         self.update_url = 'http://127.0.0.1:8000/api/datatable/update/'
         self.add_url = 'http://127.0.0.1:8000/api/datatable/add'
-        self.api_app = Core()
         self.token = self.get_token()
         self.plants = {}
         self.sensors = []
@@ -21,11 +20,24 @@ class CoreMenu():
 
     def get_token(self):
         token = input('Please Enter Token: ')
-        if self.api_app.is_token_valid(token=token):
+        if self.is_token_valid(token=token):
             return token
         else:
             print('TOKEN NOT VALID!!!')
             return None
+
+    def is_token_valid(self, token):
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json',
+        }
+        url = f'http://127.0.0.1:8000/api/get_all_plants/'
+        response = requests.get(url, headers=headers)
+        response_json = response.json()
+        if response.status_code != 200 and response_json['detail'] == 'Given token not valid for any token type':
+            return False
+        else:
+            return True
 
     def add_sensor(self):
         sensor = Sensor(pin=input('enter sensor pin: '), sensor_type=int(input('Enter 0 for moisture sensor or 1 for ph/ec/npk sensor: ')), plant_id=int(input('enter plant_id'))) # change plant_id to come directly without user input
@@ -58,19 +70,11 @@ class CoreMenu():
                         return 'No Plant Found!!!'
 
     def get_plant_data(self):
-        self.core.sync_data_from_server(token=self.token)
-
-
-
-
-
+        self.core.sync_data_from_server(token = self.token)
 
     def run(self):
         pass
-start = 'Hello'
 
 menu = CoreMenu()
-
-menu.add_sensor()
 menu.get_plant_data()
 print(menu.collect_data(sensor_p=1))

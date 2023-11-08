@@ -209,21 +209,24 @@ class Core:
         else:
             plant_data = self.fetch_plant_data(token=token)
         print(plant_data, 'PLANT DATA')
+        server_pids = [plant['id'] for plant in plant_data]
         for plant in plant_data:
             vals = []
             for k, v in plant.items():
                 if k not in ['photo', 'user']:
                     if k == 'id':
-                        plants_ids.remove(v)
+                        print(v)
+                        if v in plants_ids:
+                            plants_ids.remove(v)
                     vals.append(v)
             print(vals, 'VALSS')
             try:
-                if plants_ids
-                self.db.drop_record(record_id=plants_ids)
                 insert_query = "INSERT INTO PLANT(plant_id, plant_name, ec, ph, nitrogen, phosphorus, potassium, temperature, ideal_moisture, fertilizer, plant_coefficient) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE plant_name = VALUES(plant_name), ec = VALUES(ec), ph = VALUES(ph), nitrogen = VALUES(nitrogen), phosphorus = VALUES(phosphorus), potassium = VALUES(potassium), temperature = VALUES(temperature), ideal_moisture = VALUES(ideal_moisture), fertilizer = VALUES(fertilizer), plant_coefficient = VALUES(plant_coefficient)"
                 self.db.insert_data(insert_query, vals)
             except mysql.connector.Error as e:
                 print(f'an error occurred {e}')
+        for plant_id in plants_ids:
+            self.db.drop_record(record_id=plant_id)
 
     def is_token_valid(self, token):
         headers = {
