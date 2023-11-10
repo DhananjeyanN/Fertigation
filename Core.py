@@ -226,6 +226,7 @@ class Core:
             except mysql.connector.Error as e:
                 print(f'an error occurred {e}')
         for plant_id in plants_ids:
+            print(plants_ids)
             self.db.drop_record(record_id=plant_id)
 
     def is_token_valid(self, token):

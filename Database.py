@@ -46,10 +46,15 @@ class DatabaseConfig():
     def drop_table(self, table_name):
         self.cursor.execute(f"DROP TABLE {table_name}")
 
-    def drop_record(self, record_id, table_name='PLANT', pk='plant_id'):
+    def drop_record(self, record_id = None, table_name='PLANT', pk='plant_id'):
+        self.use_database(db_name=self.database_name)
+        record_id = int(record_id)
         query = f'DELETE FROM {table_name} WHERE {pk} = {record_id}'
+        print(query)
         self.cursor.execute(query)
+        self.connection.commit()
         print('ITEM DELETED')
+
 
     def use_database(self, db_name = None):
         if db_name is None:
