@@ -9,7 +9,7 @@ from Plant import Plant
 
 
 class Core:
-    def __init__(self):
+    def __init__(self, token):
         self.api_key = None
         self.lat = '37.777081'
         self.lon = '-121.967522'
@@ -17,6 +17,7 @@ class Core:
         self.db.connect()
         self.db.create_database('Weather')
         self.setup_db()
+        self.token = token
 
     def get_forecast(self):
         response = requests.get(
@@ -111,15 +112,12 @@ class Core:
 
     def save_data_plant(self, plant_data):
         for plant in plant_data:
-            print(plant)
             vals = []
             for k, v in plant.items():
                 if k == 'photo' or k == 'user':
                     pass
                 else:
-                    print(k, v, 'hi')
                     vals.append(v)
-            print(vals, 'dddd')
             try:
                 insert_query = "INSERT INTO PLANT(plant_id, plant_name, ec, ph, nitrogen, phosphorus, potassium, temperature, ideal_moisture, fertilizer, plant_coefficient) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
                 self.db.insert_data(insert_query, vals)
@@ -164,22 +162,17 @@ class Core:
         vals.append(m_temp)
         vals.append(m_moist)
         vals.append(date)
-        print(vals)
         insert_query = "INSERT INTO LOCALPLANTDATA(uuid, plant_name, plant_id ,m_ec, m_ph, m_nitrogen, m_phosphorus, m_potassium, m_temp, m_moist, date) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         self.db.insert_data(insert_query, vals)
 
     def sync_data_to_server(self):
-        print('BEANS')
         local_plant_data = self.db.fetch_data('LOCALPLANTDATA')
         fields = ['plant_id', 'uuid', 'm_temp', 'm_moist', 'm_ec', 'm_nitrogen', 'm_phosphorus', 'm_potassium', 'm_ph', 'date_time']
         token = input("enter token:")
-        print(local_plant_data, 'lpd')
         for p in local_plant_data:
             p = list(p)
-            print('local_plant_data')
             new_p = []
             del p[0:1]
-            print(new_p, 'hello')
             new_p.append(p[2])  # plant_id
             new_p.append(p[0])  # uuid
             new_p.append(str(p[8]))  # m_temp
@@ -191,42 +184,28 @@ class Core:
             new_p.append(str(p[4]))  # m_ph
             new_p.append(str(p[-1]))  # datetime
             plant_data = dict(zip(fields, new_p))
-            print(plant_data, 'SENDING DATA')
             res = update_data_table_entry(entry_id=plant_data['uuid'], updated_data=plant_data, token=token)
-            print(res.status_code, 'ffffff')
             if res.status_code == 404:
-                print('CREATING DATA TABLE')
-                print(plant_data)
                 add_data_table_entry(new_data=plant_data, token=token)
 
-    def sync_data_from_server(self, token=None):
+    def sync_data_from_server(self):
         plants = self.db.fetch_data(table_name='PLANT')
-        print(plants, 'PLANTS')
         plants_ids = [plant[0] for plant in plants]
-        print(plants_ids)
-        if token == None:
-            plant_data = self.fetch_plant_data(token=input('Enter Token: '))
-        else:
-            plant_data = self.fetch_plant_data(token=token)
-        print(plant_data, 'PLANT DATA')
-        server_pids = [plant['id'] for plant in plant_data]
+        plant_data = self.fetch_plant_data(token=self.token)
         for plant in plant_data:
             vals = []
             for k, v in plant.items():
                 if k not in ['photo', 'user']:
                     if k == 'id':
-                        print(v)
                         if v in plants_ids:
                             plants_ids.remove(v)
                     vals.append(v)
-            print(vals, 'VALSS')
             try:
                 insert_query = "INSERT INTO PLANT(plant_id, plant_name, ec, ph, nitrogen, phosphorus, potassium, temperature, ideal_moisture, fertilizer, plant_coefficient) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE plant_name = VALUES(plant_name), ec = VALUES(ec), ph = VALUES(ph), nitrogen = VALUES(nitrogen), phosphorus = VALUES(phosphorus), potassium = VALUES(potassium), temperature = VALUES(temperature), ideal_moisture = VALUES(ideal_moisture), fertilizer = VALUES(fertilizer), plant_coefficient = VALUES(plant_coefficient)"
                 self.db.insert_data(insert_query, vals)
             except mysql.connector.Error as e:
                 print(f'an error occurred {e}')
         for plant_id in plants_ids:
-            print(plants_ids)
             self.db.drop_record(record_id=plant_id)
 
     def is_token_valid(self, token):

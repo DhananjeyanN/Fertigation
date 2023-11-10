@@ -20,20 +20,17 @@ class DatabaseConfig():
         self.connection = mysql.connector.connect(host=self.host, user=self.user, password=self.password,
                                                   port=self.port)
         self.cursor = self.connection.cursor()
-        print(f"Connected Successfully")
 
     def create_database(self, database_name):
         # self.cursor.execute(f"DROP DATABASE IF EXISTS {database_name}")
         query = f"CREATE DATABASE IF NOT EXISTS {database_name}"
         self.cursor.execute(query)
-        print(f"{database_name} created successfully")
         self.database_name = database_name
 
     def create_table(self, table_name, query):
         self.use_database()
         # self.cursor.execute(f"DROP TABLE IF EXISTS {table_name}")
         self.cursor.execute(query)
-        print(f"{table_name} created successfully")
 
     def insert_data(self, query, row):
         self.use_database()

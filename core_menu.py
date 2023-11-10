@@ -16,7 +16,7 @@ class CoreMenu():
         self.sensors = []
         self.database = DatabaseConfig(db_name = 'Weather')
         self.database.connect()
-        self.core = Core()
+        self.core = Core(token=self.token)
 
     def get_token(self):
         token = input('Please Enter Token: ')
@@ -70,7 +70,7 @@ class CoreMenu():
                         return 'No Plant Found!!!'
 
     def get_plant_data(self):
-        self.core.sync_data_from_server(token = self.token)
+        self.core.sync_data_from_server()
 
     def run(self):
         pass
