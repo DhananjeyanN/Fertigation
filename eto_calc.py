@@ -20,15 +20,15 @@ def calculate_ET0(Latitude, Altitude, Date, Tmin, Tmax):
     return None
 
 
-# Example usage
-Latitude = 37.5
-Altitude = 500.0
-Date = 7.0
-Tmin = 10.0
-Tmax = 30.0
-
-ET0 = calculate_ET0(Latitude, Altitude, Date, Tmin, Tmax)
-if ET0 is not None:
-    print("Reference Evapotranspiration (ET0):", ET0)
-else:
-    print("Invalid input values.")
+# # Example usage
+# Latitude = 37.5
+# Altitude = 500.0
+# Date = 7.0
+# Tmin = 10.0
+# Tmax = 30.0
+#
+# ET0 = calculate_ET0(Latitude, Altitude, Date, Tmin, Tmax)
+# if ET0 is not None:
+#     print("Reference Evapotranspiration (ET0):", ET0)
+# else:
+#     print("Invalid input values.")

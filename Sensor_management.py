@@ -28,5 +28,5 @@ class Sensor:
                                 'potassium': [0, 500]}  # ph, ec, npk
 
 
-sensor = Sensor(sensor_type=1)
-print(sensor.collect_data())
+# sensor = Sensor(sensor_type=1)
+# print(sensor.collect_data())

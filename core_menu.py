@@ -4,7 +4,7 @@ from eto_calc import calculate_ET0
 from Database import DatabaseConfig
 import requests
 from Sensor_management import Sensor
-
+import threading
 
 class CoreMenu():
     def __init__(self):
@@ -49,9 +49,11 @@ class CoreMenu():
                 s_data = sensor.collect_data()
                 plant_id = sensor.plant_id
                 plant = self.database.check_table_id(table_name='PLANT', pk=plant_id)
+                print(plant, 'PLANT')
                 if plant:
 
-                    self.core.save_data_measured_plant(plant_name=plant.plant_name, plant_id=plant_id, m_data={'m_moist': s_data})
+                    self.core.save_data_measured_plant(plant_name=plant[2], plant_id=plant_id,
+                                                       m_data={'m_moist': s_data})
                     self.core.sync_data_to_server()
                 else:
                     return 'No Plant Found!!!'
@@ -72,9 +74,22 @@ class CoreMenu():
     def get_plant_data(self):
         self.core.sync_data_from_server()
 
+    def schedule_sync(self, interval=10):
+        print(self.collect_data())
+        threading.Timer(interval, self.schedule_sync).start()
+        print('INTERVAL', interval)
+
     def run(self):
-        pass
+        self.schedule_sync()
+
+
+
+
+
 
 menu = CoreMenu()
 menu.get_plant_data()
-print(menu.collect_data(sensor_p=1))
+# menu.add_sensor()
+# print(menu.collect_data(sensor_p=1))
+menu.run()
+

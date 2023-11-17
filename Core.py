@@ -23,7 +23,7 @@ class Core:
         response = requests.get(
             'https://api.weatherapi.com/v1/forecast.json?key=f2814ffe169642c4a8641448232206&q=94582&days=2&aqi=no&alerts=no')
         weather_data = response.json()
-        print(weather_data)
+        # print(weather_data)
         self.save_data(weather_data)
 
     def setup_db(self):
@@ -50,6 +50,9 @@ class Core:
                  'm_nitrogen DECIMAL(12,6), m_phosphorus DECIMAL(12,6), m_potassium DECIMAL(12,6), m_temp DECIMAL(12,6), m_moist DECIMAL(12,6), date DATETIME);'
         self.db.create_table(table_name='Localplantdata', query=query4)
 
+        query5 = 'CREATE TABLE IF NOT EXISTS SENSORS(row_id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(row_id), plant_id INT NOT NULL, sensor_pin INT NOT NULL, sensor_type INT NOT NULL);'
+        self.db.create_table(table_name='Sensor', query=query5)
+
     def save_data(self, weather_data):
         current_cols = {
             'lon': 'longitude',
@@ -71,8 +74,8 @@ class Core:
         current_dict['date'] = datetime.now()
         insert_query = "INSERT INTO CURRENT(latitude, longitude, temperature_f, wind_mph, pressure_in, precipitation_in, humidity, cloud, date) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         row = list(current_dict.values())
-        print(list(current_dict.keys()))
-        print(row)
+        # print(list(current_dict.keys()))
+        # print(row)
         self.db.insert_data(insert_query, row)
 
     def fetch_plant_data(self, plant_id=None, token=None):
@@ -124,6 +127,10 @@ class Core:
             except mysql.connector.IntegrityError:
                 pass
 
+    def save_sensor(self, sensor_data):
+        insert_query = "INSERT INTO SENSORS(plant_id, sensor_pin, sensor_type) VALUES(%s,%s,%s)"
+        self.db.insert_data(insert_query, sensor_data)
+
     def save_data_measured_plant(self, plant_name, plant_id, m_data):  # plant_id: send plant unique id, m_data: send dict with name and data
         vals = []
         m_ec = None
@@ -168,7 +175,7 @@ class Core:
     def sync_data_to_server(self):
         local_plant_data = self.db.fetch_data('LOCALPLANTDATA')
         fields = ['plant_id', 'uuid', 'm_temp', 'm_moist', 'm_ec', 'm_nitrogen', 'm_phosphorus', 'm_potassium', 'm_ph', 'date_time']
-        token = input("enter token:")
+        token = self.token
         for p in local_plant_data:
             p = list(p)
             new_p = []
