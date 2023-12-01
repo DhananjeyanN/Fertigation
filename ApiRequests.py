@@ -5,13 +5,13 @@ def get_data_table_entries():
     url = 'http://127.0.0.1:8000/api/datatable'
     token = input('Enter Token')
     data = requests.get(url, headers={'Authorization': f'Bearer {token}'})
-    print(data.json())
+    # print(data.json())
     return data.json()
 
 
 def update_data_table_entry(entry_id, updated_data, token):
     url = f'http://127.0.0.1:8000/api/datatable/update/{entry_id}/'  # Assuming this is your endpoint
-    print(url)
+    # print(url)
 
     headers = {
         'Authorization': f'Bearer {token}',
@@ -19,8 +19,8 @@ def update_data_table_entry(entry_id, updated_data, token):
     }
 
     response = requests.put(url, json=updated_data, headers=headers)
-    print(response.status_code)
-    print(response.text)
+    # print(response.status_code)
+    # print(response.text)
 
     return response
 
@@ -37,8 +37,8 @@ def update_plant_entry(plant_id, updated_data, token = None):
         'Content-Type': 'application/json',
     }
     response = requests.put(url, json=updated_data, headers=headers)
-    print(response.status_code)
-    print(response.text)
+    # print(response.status_code)
+    # print(response.text)
 
     return response.json()
 
@@ -52,14 +52,15 @@ def add_data_table_entry(new_data, token= None):
         'Authorization': f'Bearer {token}',
         'Content-Type': 'application/json',
     }
-    print(new_data)
+    # print(new_data)
     response = requests.post(url, json=new_data, headers=headers)
-    print(response.status_code, 'ADDING DATA')
-    print(response.text)
+    # print(response.status_code, 'ADDING DATA')
+    # print(response.text)
     if response.status_code == 201:
         return response.json()
     else:
-        print(response.text)
+        # print(response.text)
+        pass
 
 
 def del_data_table_entry(entry_id):
@@ -72,8 +73,8 @@ def del_data_table_entry(entry_id):
     }
 
     response = requests.delete(url, headers=headers)
-    print(response.status_code)
-    print(response.text)
+    # print(response.status_code)
+    # print(response.text)
     if response.status_code == 204:
         return {'message': 'deleted succesfully!!!'}
     else:

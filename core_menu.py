@@ -6,6 +6,7 @@ import requests
 from Sensor_management import Sensor
 import threading
 
+
 class CoreMenu():
     def __init__(self):
         self.get_url = 'http://127.0.0.1:8000/api/datatable'
@@ -14,7 +15,7 @@ class CoreMenu():
         self.token = self.get_token()
         self.plants = {}
         self.sensors = []
-        self.database = DatabaseConfig(db_name = 'Weather')
+        self.database = DatabaseConfig(db_name='Weather')
         self.database.connect()
         self.core = Core(token=self.token)
 
@@ -39,17 +40,20 @@ class CoreMenu():
         else:
             return True
 
-    def add_sensor(self):
-        sensor = Sensor(pin=input('enter sensor pin: '), sensor_type=int(input('Enter 0 for moisture sensor or 1 for ph/ec/npk sensor: ')), plant_id=int(input('enter plant_id'))) # change plant_id to come directly without user input
+    def add_sensor(self, option=False):
+        sensor = Sensor(pin=input('enter sensor pin: '),
+                        sensor_type=int(input('Enter 0 for moisture sensor or 1 for ph/ec/npk sensor: ')),
+                        plant_id=int(input('enter plant_id')))  # change plant_id to come directly without user input
         self.sensors.append(sensor)
+        if option == False:
+            self.core.save_sensor(sensor_data=[sensor.plant_id, sensor.pin, sensor.sensor_type])
 
-    def collect_data(self, sensor_p = None):
+    def collect_data(self, sensor_p=None):
         if sensor_p is None:
             for sensor in self.sensors:
                 s_data = sensor.collect_data()
                 plant_id = sensor.plant_id
                 plant = self.database.check_table_id(table_name='PLANT', pk=plant_id)
-                print(plant, 'PLANT')
                 if plant:
 
                     self.core.save_data_measured_plant(plant_name=plant[2], plant_id=plant_id,
@@ -63,7 +67,6 @@ class CoreMenu():
                     s_data = sensor.collect_data()
                     plant_id = sensor.plant_id
                     plant = self.database.check_table_id(table_name='PLANT', pk=plant_id)
-                    print(plant, 'PLANT')
                     if plant:
                         self.core.save_data_measured_plant(plant_name=plant[2], plant_id=plant_id,
                                                            m_data={'m_moist': s_data})
@@ -76,20 +79,21 @@ class CoreMenu():
 
     def schedule_sync(self, interval=10):
         print(self.collect_data())
+        self.core.sync_data_from_server()
+        self.core.sync_data_to_server()
         threading.Timer(interval, self.schedule_sync).start()
         print('INTERVAL', interval)
 
     def run(self):
+        sensors = self.database.fetch_data('SENSORS')
+        for sensor in sensors:
+            print(sensor)
+            self.sensors.append(Sensor(pin=sensor[2], sensor_type=sensor[3], plant_id=sensor[1]))
+        print(self.sensors)
         self.schedule_sync()
-
-
-
-
 
 
 menu = CoreMenu()
 menu.get_plant_data()
-# menu.add_sensor()
 # print(menu.collect_data(sensor_p=1))
 menu.run()
-

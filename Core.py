@@ -232,6 +232,31 @@ class Core:
         # print(plant_data)
         # self.save_data_plant(plant_data=plant_data)
 
+    def fetch_sensor_data(self, token=None):
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json',
+        }
+        url = f'http://127.0.0.1:8000/api/get_sensors/'
+        response = requests.get(url, headers=headers)
+        print(response)
+        response_json = response.json()
+        print(response_json)
+        if response.status_code == 200:
+            response_json = list(response_json)
+            sensors = []
+            sensor_fields = ['plant','sensor_pin, sensor_type']
+            for sensor in response_json:
+                new_sensor = {}
+                for key in sensor.keys():
+                    if key in sensor_fields:
+                        new_sensor[key] = sensor.get(key)
+                sensors.append(new_sensor)
+            return sensors
+        else:
+            print('NO SENSOR FOUND')
+            return None
+
 
 # hi = Core()
 # hi.get_forecast()

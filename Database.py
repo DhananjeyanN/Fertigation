@@ -6,7 +6,7 @@ load_dotenv()
 
 
 class DatabaseConfig():
-    def __init__(self, db_name = None):
+    def __init__(self, db_name=None):
         self.host = os.getenv("host")
         self.user = os.getenv("user")
         self.password = os.getenv("password")
@@ -43,7 +43,7 @@ class DatabaseConfig():
     def drop_table(self, table_name):
         self.cursor.execute(f"DROP TABLE {table_name}")
 
-    def drop_record(self, record_id = None, table_name='PLANT', pk='plant_id'):
+    def drop_record(self, record_id=None, table_name='PLANT', pk='plant_id'):
         self.use_database(db_name=self.database_name)
         record_id = int(record_id)
         query = f'DELETE FROM {table_name} WHERE {pk} = {record_id}'
@@ -52,14 +52,12 @@ class DatabaseConfig():
         self.connection.commit()
         print('ITEM DELETED')
 
-
-    def use_database(self, db_name = None):
+    def use_database(self, db_name=None):
         if db_name is None:
             self.cursor.execute(f"USE {self.database_name}")
         else:
             self.cursor.execute(f"USE {db_name}")
             self.database_name = db_name
-
 
     def fetch_data(self, table_name):
         self.use_database()
@@ -72,9 +70,10 @@ class DatabaseConfig():
         self.cursor.execute(query)
         record = self.cursor.fetchone()
         return record
-    def check_table_id(self, table_name, pk): #pk is unique id to filter with
+
+    def check_table_id(self, table_name, pk):  # pk is unique id to filter with
         self.use_database()
-        fetch_query = f"SELECT * FROM {table_name}"
+        fetch_query = f"SELECT * FROM {table_name} WHERE plant_id = {pk}"
         self.cursor.execute(fetch_query)
         data = self.cursor.fetchone()
         return data
