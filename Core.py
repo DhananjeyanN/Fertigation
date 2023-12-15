@@ -50,7 +50,7 @@ class Core:
                  'm_nitrogen DECIMAL(12,6), m_phosphorus DECIMAL(12,6), m_potassium DECIMAL(12,6), m_temp DECIMAL(12,6), m_moist DECIMAL(12,6), date DATETIME);'
         self.db.create_table(table_name='Localplantdata', query=query4)
 
-        query5 = 'CREATE TABLE IF NOT EXISTS SENSORS(row_id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(row_id), plant_id INT NOT NULL, sensor_pin INT NOT NULL, sensor_type INT NOT NULL);'
+        query5 = 'CREATE TABLE IF NOT EXISTS SENSORS(PRIMARY KEY(plant_id), plant_id INT NOT NULL, sensor_pin INT NOT NULL, sensor_type INT NOT NULL);'
         self.db.create_table(table_name='Sensor', query=query5)
 
     def save_data(self, weather_data):
@@ -129,6 +129,7 @@ class Core:
 
     def save_sensor(self, sensor_data):
         insert_query = "INSERT INTO SENSORS(plant_id, sensor_pin, sensor_type) VALUES(%s,%s,%s)"
+        print(insert_query, 'INSERT', sensor_data, 'SENSOR')
         self.db.insert_data(insert_query, sensor_data)
 
     def save_data_measured_plant(self, plant_name, plant_id, m_data):  # plant_id: send plant unique id, m_data: send dict with name and data
@@ -232,9 +233,9 @@ class Core:
         # print(plant_data)
         # self.save_data_plant(plant_data=plant_data)
 
-    def fetch_sensor_data(self, token=None):
+    def fetch_sensor_data(self):
         headers = {
-            'Authorization': f'Bearer {token}',
+            'Authorization': f'Bearer {self.token}',
             'Content-Type': 'application/json',
         }
         url = f'http://127.0.0.1:8000/api/get_sensors/'
@@ -246,16 +247,31 @@ class Core:
             response_json = list(response_json)
             sensors = []
             sensor_fields = ['plant','sensor_pin, sensor_type']
+            print(response_json)
             for sensor in response_json:
-                new_sensor = {}
-                for key in sensor.keys():
-                    if key in sensor_fields:
-                        new_sensor[key] = sensor.get(key)
-                sensors.append(new_sensor)
+                values = list(sensor.values())
+                values = [values[-1]] + values[1:3]
+                sensors.append(tuple(values))
+            print(sensors)
             return sensors
         else:
             print('NO SENSOR FOUND')
             return None
+
+    def save_sensor_data(self, sensors):
+        for sensor in sensors:
+            plant_id, sensor_pin, sensor_type = sensor
+            if not self.db.fetch_one(query=f'SELECT * FROM SENSORS WHERE plant_id={plant_id}'):
+                self.save_sensor(sensor_data=sensor)
+                print(f'Sensor {plant_id} Added!!!')
+            else:
+                print(f'Sensor for {plant_id} exists!!!')
+
+    def del_sensor_data(self, plant_id):
+        pass
+
+# core = Core(token=' eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjo0ODU1OTU3MjMxLCJpYXQiOjE3MDIzNTcyMzEsImp0aSI6ImEwODc3MzEwYzI5YzQ3M2RhNjI4YWI3ZDY1MzZmMTVhIiwidXNlcl9pZCI6M30.6Vz0v1sViAG43cLphZzba6jEaDeF90W7w3xcaIC_Mdk')
+# core.save_sensor_data(sensors=core.fetch_sensor_data())
 
 
 # hi = Core()

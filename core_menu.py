@@ -81,6 +81,7 @@ class CoreMenu():
         print(self.collect_data())
         self.core.sync_data_from_server()
         self.core.sync_data_to_server()
+        self.core.save_sensor_data(sensors=self.core.fetch_sensor_data())
         threading.Timer(interval, self.schedule_sync).start()
         print('INTERVAL', interval)
 
