@@ -34,6 +34,7 @@ class DatabaseConfig():
 
     def insert_data(self, query, row):
         self.use_database()
+        print(query, row)
         self.cursor.execute(query, row)
         self.connection.commit()
 

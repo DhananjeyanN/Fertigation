@@ -57,7 +57,7 @@ class CoreMenu():
                 if plant:
 
                     self.core.save_data_measured_plant(plant_name=plant[2], plant_id=plant_id,
-                                                       m_data={'m_moist': s_data})
+                                                       m_data=s_data)
                     self.core.sync_data_to_server()
                 else:
                     return 'No Plant Found!!!'
@@ -89,7 +89,7 @@ class CoreMenu():
         sensors = self.database.fetch_data('SENSORS')
         for sensor in sensors:
             print(sensor)
-            self.sensors.append(Sensor(pin=sensor[2], sensor_type=sensor[3], plant_id=sensor[1]))
+            self.sensors.append(Sensor(pin=sensor[1], sensor_type=sensor[2], plant_id=sensor[0]))
         print(self.sensors)
         self.schedule_sync()
 

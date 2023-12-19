@@ -11,9 +11,11 @@ class Sensor:
         self.result = {}
 
     def collect_data(self):
+        self.set_valid_range()
         if self.sensor_type == 0:
-            return random.randint(a=self.valid_range['moisture'][0], b=self.valid_range['moisture'][1])
+            return {'moisture': random.randint(a=self.valid_range['moisture'][0], b=self.valid_range['moisture'][1])}
         else:
+            print(self.valid_range, 'VALID RANGE')
             return {'ph': random.randint(a=self.valid_range['ph'][0], b=self.valid_range['ph'][1]),
                     'ec': random.randint(a=self.valid_range['ec'][0], b=self.valid_range['ec'][1]),
                     'nitrogen': random.randint(a=self.valid_range['nitrogen'][0], b=self.valid_range['nitrogen'][1]),

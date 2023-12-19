@@ -6,6 +6,7 @@ from Database import DatabaseConfig
 import uuid
 
 from Plant import Plant
+from Sensor_management import Sensor
 
 
 class Core:
@@ -142,6 +143,7 @@ class Core:
         m_temp = None
         m_moist = None
         date = datetime.now()
+        print(m_data, 'NAJKDSA')
         for name, data in m_data.items():
             if name == 'm_ec':
                 m_ec = data
@@ -267,11 +269,19 @@ class Core:
             else:
                 print(f'Sensor for {plant_id} exists!!!')
 
+    def load_sensors(self):
+        data = self.db.fetch_data(table_name='SENSORS')
+        sensors = []
+        for row in data:
+            sensor = Sensor(pin=row[1], plant_id=row[0], sensor_type=row[2])
+            sensors.append(sensor)
+        return sensors
     def del_sensor_data(self, plant_id):
         pass
 
 # core = Core(token=' eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjo0ODU1OTU3MjMxLCJpYXQiOjE3MDIzNTcyMzEsImp0aSI6ImEwODc3MzEwYzI5YzQ3M2RhNjI4YWI3ZDY1MzZmMTVhIiwidXNlcl9pZCI6M30.6Vz0v1sViAG43cLphZzba6jEaDeF90W7w3xcaIC_Mdk')
-# core.save_sensor_data(sensors=core.fetch_sensor_data())
+#
+# print(core.load_sensors())
 
 
 # hi = Core()
