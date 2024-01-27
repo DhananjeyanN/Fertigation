@@ -51,9 +51,11 @@ class Core:
                  'm_nitrogen DECIMAL(12,6), m_phosphorus DECIMAL(12,6), m_potassium DECIMAL(12,6), m_temp DECIMAL(12,6), m_moist DECIMAL(12,6), date DATETIME);'
         self.db.create_table(table_name='Localplantdata', query=query4)
 
-        query5 = 'CREATE TABLE IF NOT EXISTS SENSORS(PRIMARY KEY(plant_id), plant_id INT NOT NULL, sensor_pin INT NOT NULL, sensor_type INT NOT NULL);'
+        query5 = 'CREATE TABLE IF NOT EXISTS SENSORS(PRIMARY KEY(plant_id), plant_id INT NOT NULL, sensor_pin INT NOT NULL);'
         self.db.create_table(table_name='Sensor', query=query5)
 
+        query6 = 'CREATE TABLE IF NOT EXISTS NPKSENSOR(current_plant INT, sensor_pin INT NOT NULL);'
+        self.db.create_table(table_name='NPKSensor', query=query6)
     def save_data(self, weather_data):
         current_cols = {
             'lon': 'longitude',
@@ -129,8 +131,13 @@ class Core:
                 pass
 
     def save_sensor(self, sensor_data):
-        insert_query = "INSERT INTO SENSORS(plant_id, sensor_pin, sensor_type) VALUES(%s,%s,%s)"
+        insert_query = "INSERT INTO SENSORS(plant_id, sensor_pin) VALUES(%s,%s)"
         print(insert_query, 'INSERT', sensor_data, 'SENSOR')
+        self.db.insert_data(insert_query, sensor_data)
+
+    def save_npksensor(self, sensor_data):
+        insert_query = "INSERT INTO NPKSENSOR(current_plant, sensor_pin) VALUES(%s,%s)"
+        print(insert_query, 'INSERT', sensor_data, 'NPKSENSOR')
         self.db.insert_data(insert_query, sensor_data)
 
     def save_data_measured_plant(self, plant_name, plant_id, m_data):  # plant_id: send plant unique id, m_data: send dict with name and data
@@ -145,19 +152,19 @@ class Core:
         date = datetime.now()
         print(m_data, 'NAJKDSA')
         for name, data in m_data.items():
-            if name == 'm_ec':
+            if name == 'ec':
                 m_ec = data
-            elif name == 'm_ph':
+            elif name == 'ph':
                 m_ph = data
-            elif name == 'm_nitrogen':
+            elif name == 'nitrogen':
                 m_nitrogen = data
-            elif name == 'm_phosphorus':
+            elif name == 'phosphorus':
                 m_phosphorus = data
-            elif name == 'm_potassium':
+            elif name == 'potassium':
                 m_potassium = data
-            elif name == 'm_temp':
+            elif name == 'temp':
                 m_temp = data
-            elif name == 'm_moist':
+            elif name == 'moisture':
                 m_moist = data
             else:
                 print('No Data!!!')
@@ -177,9 +184,11 @@ class Core:
 
     def sync_data_to_server(self):
         local_plant_data = self.db.fetch_data('LOCALPLANTDATA')
+        print(local_plant_data, 'DADA')
         fields = ['plant_id', 'uuid', 'm_temp', 'm_moist', 'm_ec', 'm_nitrogen', 'm_phosphorus', 'm_potassium', 'm_ph', 'date_time']
         token = self.token
         for p in local_plant_data:
+            print(p, 'P')
             p = list(p)
             new_p = []
             del p[0:1]
@@ -193,7 +202,9 @@ class Core:
             new_p.append(str(p[7]))  # m_potassium
             new_p.append(str(p[4]))  # m_ph
             new_p.append(str(p[-1]))  # datetime
+            print(new_p, 'new_p')
             plant_data = dict(zip(fields, new_p))
+            print(plant_data, 'plant_data')
             res = update_data_table_entry(entry_id=plant_data['uuid'], updated_data=plant_data, token=token)
             if res.status_code == 404:
                 add_data_table_entry(new_data=plant_data, token=token)

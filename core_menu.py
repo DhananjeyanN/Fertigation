@@ -1,3 +1,5 @@
+import sys
+
 from Core import Core
 from Plant import Plant
 from eto_calc import calculate_ET0
