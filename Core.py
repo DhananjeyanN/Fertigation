@@ -6,7 +6,7 @@ from Database import DatabaseConfig
 import uuid
 
 from Plant import Plant
-from Sensor_management import Sensor
+from Sensor_management import Sensor, NPKSensor
 
 
 class Core:
@@ -135,7 +135,7 @@ class Core:
         print(insert_query, 'INSERT', sensor_data, 'SENSOR')
         self.db.insert_data(insert_query, sensor_data)
 
-    def save_npksensor(self, sensor_data):
+    def save_npk_sensor(self, sensor_data):
         insert_query = "INSERT INTO NPKSENSOR(current_plant, sensor_pin) VALUES(%s,%s)"
         print(insert_query, 'INSERT', sensor_data, 'NPKSENSOR')
         self.db.insert_data(insert_query, sensor_data)
@@ -150,7 +150,6 @@ class Core:
         m_temp = None
         m_moist = None
         date = datetime.now()
-        print(m_data, 'NAJKDSA')
         for name, data in m_data.items():
             if name == 'ec':
                 m_ec = data
@@ -259,7 +258,6 @@ class Core:
         if response.status_code == 200:
             response_json = list(response_json)
             sensors = []
-            sensor_fields = ['plant','sensor_pin, sensor_type']
             print(response_json)
             for sensor in response_json:
                 values = list(sensor.values())
@@ -267,6 +265,29 @@ class Core:
                 sensors.append(tuple(values))
             print(sensors)
             return sensors
+        else:
+            print('NO SENSOR FOUND')
+            return None
+
+    def fetch_npk_sensor_data(self):
+        headers = {
+            'Authorization': f'Bearer {self.token}',
+            'Content-Type': 'application/json',
+        }
+        url = f'http://127.0.0.1:8000/api/get_npk_sensor/'
+        response = requests.get(url, headers=headers)
+        print(response)
+        response_json = response.json()
+        print(response_json)
+        if response.status_code == 200:
+            response_json = list(response_json)
+            sensor = response_json[0]
+            values = list(sensor.values())
+            print(values)
+            # values = [values[-1]] + values[1:3]
+            values = [values[1], values[3]]
+            print(values)
+            return tuple(values)
         else:
             print('NO SENSOR FOUND')
             return None
@@ -280,6 +301,14 @@ class Core:
             else:
                 print(f'Sensor for {plant_id} exists!!!')
 
+    def save_npk_sensor_data(self, sensor):
+        sensor_pin, current_plant = sensor
+        if not self.db.fetch_one(query=f'SELECT * FROM NPKSENSOR'):
+            self.save_npk_sensor(sensor_data=sensor)
+            print('NPK Sensor Added!!!')
+        else:
+            print('NPK Sensor exists!!!')
+
     def load_sensors(self):
         data = self.db.fetch_data(table_name='SENSORS')
         sensors = []
@@ -287,9 +316,15 @@ class Core:
             sensor = Sensor(pin=row[1], plant_id=row[0], sensor_type=row[2])
             sensors.append(sensor)
         return sensors
+
+    def load_npk_sensor(self):
+        data = self.db.fetch_data(table_name='NPKSENSOR')
+        sensor = NPKSensor(pin=data[1], current_plant=data[0])
+        return sensor
     def del_sensor_data(self, plant_id):
         pass
-
+core = Core(token=' eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjo0ODU5OTMyNTQwLCJpYXQiOjE3MDYzMzI1NDAsImp0aSI6Ijg0ZWZkNjc3NmFhODQ5NjliZTczYzE4MThmYzAwZDEyIiwidXNlcl9pZCI6Mn0.dBvUQyWTW9GyOszqIhqz61ejPvijvqozHCQbfA6qt9A')
+print(core.fetch_npk_sensor_data())
 # core = Core(token=' eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjo0ODU1OTU3MjMxLCJpYXQiOjE3MDIzNTcyMzEsImp0aSI6ImEwODc3MzEwYzI5YzQ3M2RhNjI4YWI3ZDY1MzZmMTVhIiwidXNlcl9pZCI6M30.6Vz0v1sViAG43cLphZzba6jEaDeF90W7w3xcaIC_Mdk')
 #
 # print(core.load_sensors())
