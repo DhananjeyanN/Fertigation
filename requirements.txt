@@ -1,0 +1,16 @@
+certifi==2023.5.7
+charset-normalizer==3.1.0
+idna==3.4
+mysql-connector-python==8.0.33
+numpy==1.25.0
+pandas==2.0.3
+penmon @ git+https://github.com/benatouba/penmon.git@067bbf62a365118d0348975aff0a19e342a3a3b3
+protobuf==3.20.3
+python-dateutil==2.8.2
+python-dotenv==1.0.0
+pytz==2023.3
+requests==2.31.0
+six==1.16.0
+tzdata==2023.3
+urllib3==2.0.3
+uuid==1.30
