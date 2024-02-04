@@ -294,15 +294,16 @@ class Core:
 
     def save_sensor_data(self, sensors):
         for sensor in sensors:
-            plant_id, sensor_pin, sensor_type = sensor
+            plant_id, sensor_pin = sensor[1:]
+            print(plant_id, 'Plat id')
+            print(sensor, 'Sensor')
             if not self.db.fetch_one(query=f'SELECT * FROM SENSORS WHERE plant_id={plant_id}'):
-                self.save_sensor(sensor_data=sensor)
+                self.save_sensor(sensor_data=(plant_id, sensor_pin))
                 print(f'Sensor {plant_id} Added!!!')
             else:
                 print(f'Sensor for {plant_id} exists!!!')
 
     def save_npk_sensor_data(self, sensor):
-        sensor_pin, current_plant = sensor
         if not self.db.fetch_one(query=f'SELECT * FROM NPKSENSOR'):
             self.save_npk_sensor(sensor_data=sensor)
             print('NPK Sensor Added!!!')
@@ -313,7 +314,7 @@ class Core:
         data = self.db.fetch_data(table_name='SENSORS')
         sensors = []
         for row in data:
-            sensor = Sensor(pin=row[1], plant_id=row[0], sensor_type=row[2])
+            sensor = Sensor(pin=row[1], plant_id=row[0])
             sensors.append(sensor)
         return sensors
 
@@ -323,8 +324,8 @@ class Core:
         return sensor
     def del_sensor_data(self, plant_id):
         pass
-core = Core(token=' eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjo0ODU5OTMyNTQwLCJpYXQiOjE3MDYzMzI1NDAsImp0aSI6Ijg0ZWZkNjc3NmFhODQ5NjliZTczYzE4MThmYzAwZDEyIiwidXNlcl9pZCI6Mn0.dBvUQyWTW9GyOszqIhqz61ejPvijvqozHCQbfA6qt9A')
-print(core.fetch_npk_sensor_data())
+# core = Core(token=' eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjo0ODU5OTMyNTQwLCJpYXQiOjE3MDYzMzI1NDAsImp0aSI6Ijg0ZWZkNjc3NmFhODQ5NjliZTczYzE4MThmYzAwZDEyIiwidXNlcl9pZCI6Mn0.dBvUQyWTW9GyOszqIhqz61ejPvijvqozHCQbfA6qt9A')
+# print(core.fetch_npk_sensor_data())
 # core = Core(token=' eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjo0ODU1OTU3MjMxLCJpYXQiOjE3MDIzNTcyMzEsImp0aSI6ImEwODc3MzEwYzI5YzQ3M2RhNjI4YWI3ZDY1MzZmMTVhIiwidXNlcl9pZCI6M30.6Vz0v1sViAG43cLphZzba6jEaDeF90W7w3xcaIC_Mdk')
 #
 # print(core.load_sensors())
