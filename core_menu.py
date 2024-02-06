@@ -50,7 +50,7 @@ class CoreMenu():
             self.sensors.append(sensor)
         else:
             sensor = NPKSensor(pin=input('enter sensor pin: '), current_plant=int(input('enter plant_id')))
-            self.npksensors.append(sensor)
+            self.npksensor.append(sensor)
         if option is False and o2 == 0:
             self.core.save_sensor(sensor_data=[sensor.plant_id, sensor.pin])
         elif option is False and o2 == 1:
@@ -78,20 +78,24 @@ class CoreMenu():
                     plant_id = sensor.plant_id
                     plant = self.database.check_table_id(table_name='PLANT', pk=plant_id)
                     if plant:
-                        self.core.save_data_measured_plant(plant_name=plant[2], plant_id=plant_id,
-                                                           m_data={'m_moist': s_data})
+                        self.core.save_data_measured_plant(plant_name=plant[2], plant_id=plant_id, m_data={'m_moist': s_data})
                         self.core.sync_data_to_server()
                     else:
                         return 'No Plant Found!!!'
 
     def collect_data_npk(self):
-        self.npksensor
+        s_data = self.npksensor[0].collect_data()
+        current_plant_id = self.npksensor[0].current_plant
+        current_plant = self.database.check_table_id(table_name='PLANT', pk=current_plant_id)
+        if current_plant:
+            self.core.save_data_measured_plant(plant_name=current_plant[2], plant_id=current_plant_id, m_data=s_data)
 
     def get_plant_data(self):
         self.core.sync_data_from_server()
 
     def schedule_sync(self, interval=10):
         print(self.collect_data())
+        print(self.collect_data_npk())
         self.core.sync_data_from_server()
         self.core.sync_data_to_server()
         self.core.save_sensor_data(sensors=self.core.fetch_sensor_data())
